@@ -1,0 +1,8 @@
+import { NextResponse } from "next/server";
+import { getAuthUser }  from "@/lib/auth/session";
+
+export async function GET(): Promise<NextResponse> {
+  const user = await getAuthUser();
+  if (!user) return NextResponse.json({ success: false, error: "Not authenticated." }, { status: 401 });
+  return NextResponse.json({ success: true, data: user });
+}

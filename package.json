@@ -1,0 +1,14 @@
+{
+  "name": "jl-dental",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "dev":            "npm run dev --workspace=apps/web",
+    "build":          "npm run build --workspace=apps/web",
+    "lint":           "npm run lint --workspace=apps/web",
+    "seed:admin":     "cd apps/web && npx tsx ../../scripts/seed-admin.ts",
+    "seed:admin:prod":"cd apps/web && npx tsx ../../scripts/seed-admin.ts --production",
+    "verify:indexes": "cd apps/web && npx tsx ../../scripts/verify-indexes.ts"
+  }
+}

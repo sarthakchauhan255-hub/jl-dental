@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    name: Typecheck · Lint · Test · Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+
+    # Real MongoDB for the FLOW integration suite — closes Phase 6.2E certification.
+    services:
+      mongodb:
+        image: mongo:7
+        ports: ["27017:27017"]
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })' --quiet"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    env:
+      SKIP_ENV_VALIDATION: "1"
+      MONGODB_TEST_URI: mongodb://localhost:27017/jl_dental_test
+      NEXT_PUBLIC_APP_URL: https://example.com
+      NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ci-placeholder
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install (locked)
+        run: npm ci
+        working-directory: .
+
+      - name: TypeScript (production)
+        run: npx tsc --noEmit
+
+      - name: TypeScript (tests)
+        run: npm run typecheck:test
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit + FLOW integration tests (real MongoDB)
+        run: npm test
+        # MONGODB_TEST_URI is set → the 15 FLOW tests execute (0 skipped).
+
+      - name: Assert FLOW tests were NOT skipped
+        run: |
+          npx vitest run lib/cms/__tests__/flows.integration.test.ts --reporter=json > /tmp/flows.json || true
+          node -e '
+            const r = JSON.parse(require("fs").readFileSync("/tmp/flows.json","utf8"));
+            const total = r.numTotalTests, passed = r.numPassedTests, failed = r.numFailedTests, pending = r.numPendingTests;
+            console.log(`FLOW results — total:${total} passed:${passed} failed:${failed} skipped:${pending}`);
+            if (total !== 15 || passed !== 15 || failed !== 0 || pending !== 0) {
+              console.error("FLOW certification gate FAILED: expected 15/15 passed, 0 skipped.");
+              process.exit(1);
+            }
+            console.log("FLOW certification gate PASSED — Phase 6.2E requirement satisfied.");
+          '
+
+      - name: Brand check
+        run: npx tsx scripts/check-brand.ts
+
+      - name: Production build
+        run: npm run build

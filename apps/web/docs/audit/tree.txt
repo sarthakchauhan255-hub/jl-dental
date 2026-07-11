@@ -1,0 +1,230 @@
+├── README.md
+├── app
+│   ├── (admin)
+│   │   └── admin
+│   │       ├── dashboard
+│   │       │   └── page.tsx
+│   │       ├── forgot-password
+│   │       │   └── page.tsx
+│   │       ├── layout.tsx
+│   │       ├── login
+│   │       │   └── page.tsx
+│   │       └── reset-password
+│   │           └── page.tsx
+│   ├── (public)
+│   │   └── layout.tsx
+│   ├── api
+│   │   ├── appointments
+│   │   │   ├── [id]
+│   │   │   │   └── route.ts
+│   │   │   └── route.ts
+│   │   ├── auth
+│   │   │   ├── change-password
+│   │   │   │   └── route.ts
+│   │   │   ├── forgot-password
+│   │   │   │   └── route.ts
+│   │   │   ├── login
+│   │   │   │   └── route.ts
+│   │   │   ├── logout
+│   │   │   │   └── route.ts
+│   │   │   ├── me
+│   │   │   │   └── route.ts
+│   │   │   └── reset-password
+│   │   │       └── route.ts
+│   │   ├── blog
+│   │   │   ├── [id]
+│   │   │   │   └── route.ts
+│   │   │   └── route.ts
+│   │   ├── clinic
+│   │   │   └── route.ts
+│   │   ├── doctors
+│   │   │   ├── [id]
+│   │   │   │   └── route.ts
+│   │   │   └── route.ts
+│   │   ├── gallery
+│   │   │   ├── [id]
+│   │   │   │   └── route.ts
+│   │   │   └── route.ts
+│   │   ├── reviews
+│   │   │   └── route.ts
+│   │   ├── services
+│   │   │   ├── [id]
+│   │   │   │   └── route.ts
+│   │   │   └── route.ts
+│   │   └── uploads
+│   │       └── route.ts
+│   ├── error.tsx
+│   ├── favicon.ico
+│   ├── fonts
+│   │   ├── GeistMonoVF.woff
+│   │   └── GeistVF.woff
+│   ├── fonts.ts
+│   ├── globals.css
+│   ├── layout.tsx
+│   ├── not-found.tsx
+│   └── page.tsx
+├── components
+│   ├── admin
+│   │   ├── header.tsx
+│   │   ├── nav-icons.ts
+│   │   └── sidebar.tsx
+│   ├── common
+│   │   ├── container.tsx
+│   │   ├── motion.tsx
+│   │   ├── optimized-image.tsx
+│   │   ├── section.tsx
+│   │   ├── spinner.tsx
+│   │   └── status-badge.tsx
+│   ├── data-table
+│   │   ├── data-table.tsx
+│   │   ├── index.ts
+│   │   └── types.ts
+│   ├── states
+│   │   ├── empty-state.tsx
+│   │   ├── error-state.tsx
+│   │   ├── index.ts
+│   │   └── loading-state.tsx
+│   └── ui
+│       ├── badge.tsx
+│       ├── button.tsx
+│       ├── card.tsx
+│       ├── dialog.tsx
+│       ├── dropdown-menu.tsx
+│       ├── form-field.tsx
+│       ├── input.tsx
+│       ├── label.tsx
+│       ├── select.tsx
+│       ├── separator.tsx
+│       ├── sheet.tsx
+│       ├── skeleton.tsx
+│       └── textarea.tsx
+├── components.json
+├── constants
+│   ├── index.ts
+│   ├── roles.ts
+│   ├── routes.ts
+│   ├── seo.ts
+│   └── statuses.ts
+├── context
+│   └── auth-context.tsx
+├── docs
+│   └── audit
+│       ├── file-tree.txt
+│       └── tree.txt
+├── env.example
+├── env.local
+├── env.ts
+├── eslintrc.json
+├── features
+│   ├── auth
+│   │   ├── components
+│   │   │   ├── forgot-password-form.tsx
+│   │   │   ├── login-form.tsx
+│   │   │   └── reset-password-form.tsx
+│   │   └── hooks
+│   │       └── use-permission.ts
+│   └── clinic
+│       └── server
+│           └── get-clinic.ts
+├── gitignore
+├── lib
+│   ├── api
+│   │   ├── errors.ts
+│   │   ├── index.ts
+│   │   ├── logging.ts
+│   │   ├── pagination.ts
+│   │   ├── query.ts
+│   │   ├── responses.ts
+│   │   ├── validators.ts
+│   │   └── wrappers.ts
+│   ├── api-helpers.ts
+│   ├── async.ts
+│   ├── audit.ts
+│   ├── auth
+│   │   ├── errors.ts
+│   │   ├── index.ts
+│   │   ├── permissions.ts
+│   │   ├── rbac.ts
+│   │   ├── services
+│   │   │   ├── credentials.ts
+│   │   │   ├── index.ts
+│   │   │   └── reset.ts
+│   │   ├── session.ts
+│   │   └── token-schema.ts
+│   ├── cache.ts
+│   ├── constants
+│   │   ├── app.ts
+│   │   ├── auth.ts
+│   │   ├── index.ts
+│   │   ├── roles.ts
+│   │   ├── routes.ts
+│   │   ├── seo.ts
+│   │   └── statuses.ts
+│   ├── db
+│   │   ├── connection.ts
+│   │   ├── helpers.ts
+│   │   └── index.ts
+│   ├── logger.ts
+│   ├── media
+│   │   ├── cloudinary-url.ts
+│   │   ├── cloudinary.ts
+│   │   └── index.ts
+│   ├── motion.ts
+│   ├── notifications
+│   │   ├── email.ts
+│   │   ├── index.ts
+│   │   ├── sms.ts
+│   │   └── whatsapp.ts
+│   ├── security
+│   │   ├── errors.ts
+│   │   ├── index.ts
+│   │   ├── origin.ts
+│   │   ├── rate-limit.ts
+│   │   └── request.ts
+│   ├── seo.ts
+│   ├── timezone.ts
+│   ├── uploads
+│   │   ├── index.ts
+│   │   ├── policies.ts
+│   │   └── validate.ts
+│   ├── utils.ts
+│   └── validations
+│       └── index.ts
+├── middleware.ts
+├── models
+│   ├── Appointment.ts
+│   ├── AuditLog.ts
+│   ├── AuthLog.ts
+│   ├── BlogPost.ts
+│   ├── Clinic.ts
+│   ├── Doctor.ts
+│   ├── FAQ.ts
+│   ├── Gallery.ts
+│   ├── MediaPendingCleanup.ts
+│   ├── NotificationLog.ts
+│   ├── PasswordResetToken.ts
+│   ├── Review.ts
+│   ├── Service.ts
+│   ├── User.ts
+│   └── index.ts
+├── next-env.d.ts
+├── next.config.mjs
+├── package.json
+├── postcss.config.mjs
+├── prettierrc
+├── public
+│   └── fonts
+│       ├── .gitkeep
+│       ├── README.md
+│       ├── inter-var.woff2
+│       ├── playfair-var-italic.woff2
+│       └── playfair-var.woff2
+├── scripts
+│   ├── seed-admin.ts
+│   └── verify-indexes.ts
+├── tailwind.config.ts
+├── tsconfig.json
+├── tsconfig.tsbuildinfo
+└── types
+    ├── auth.ts
+    └── index.ts
