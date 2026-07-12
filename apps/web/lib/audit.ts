@@ -89,19 +89,22 @@ interface CmsAuditEntry {
 }
 
 export async function auditAction(entry: CmsAuditEntry): Promise<void> {
-  import("./db/connection")
-    .then(({ connectDB }) => connectDB())
-    .then(() => import("../models/AuditLog"))
-    .then(({ AuditLog }) => (AuditLog as unknown as { create: (d: unknown) => Promise<unknown> }).create({
+  // AWAITED, not fire-and-forget: on serverless runtimes, un-awaited work can
+  // be terminated when the response is sent, silently losing audit records.
+  // Errors are still caught here — an audit failure never breaks the request.
+  try {
+    const { connectDB } = await import("./db/connection");
+    await connectDB();
+    const { AuditLog } = await import("../models/AuditLog");
+    await (AuditLog as unknown as { create: (d: unknown) => Promise<unknown> }).create({
       userId:     entry.userId,
       action:     entry.action,
       resource:   entry.resource,
       resourceId: entry.resourceId ?? null,
       meta:       entry.meta ?? {},
-    }))
-    .catch((err: unknown) => {
-      import("./logger").then(({ logger }) =>
-        logger.warn("[Audit] CMS audit write failed", { err: String(err) })
-      );
     });
+  } catch (err: unknown) {
+    const { logger } = await import("./logger");
+    logger.warn("[Audit] CMS audit write failed", { err: String(err) });
+  }
 }

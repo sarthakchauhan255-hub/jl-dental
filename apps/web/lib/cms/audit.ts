@@ -6,7 +6,8 @@
  *  • No second audit system.
  *  • Sensitive fields sanitized before persistence.
  *  • Resource services provide context; this module normalizes it.
- *  • Fire-and-forget: never blocks API response.
+ *  • Awaited persistence (serverless-safe) — but failures are swallowed:
+ *    an audit error never breaks the API response.
  */
 import type { CmsActionDefinition, CmsRecord } from "./types";
 
@@ -30,7 +31,7 @@ export interface CmsAuditContext {
 
 /**
  * Emit a CMS audit event through the canonical audit path.
- * Fire-and-forget — errors logged, never rethrown.
+ * Awaits persistence (lost-write-safe on serverless); errors logged, never rethrown.
  */
 export async function emitCmsAudit(ctx: CmsAuditContext): Promise<void> {
   try {
