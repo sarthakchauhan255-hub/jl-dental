@@ -105,9 +105,10 @@ export class MongoCmsProvider implements CmsProvider {
     } catch { return []; }
   }
 
-  async getApprovedTestimonials(_limit = 6): Promise<TestimonialItem[]> {
-    // Phase 6: query Review collection for approved reviews
-    // Review CRUD not yet implemented — returns empty (correct spec behavior)
-    return [];
+  async getApprovedTestimonials(limit = 6): Promise<TestimonialItem[]> {
+    try {
+      const { getApprovedTestimonials } = await import("@/features/reviews/server/get-testimonials");
+      return await getApprovedTestimonials(limit);
+    } catch { return []; }
   }
 }
