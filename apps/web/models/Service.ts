@@ -42,7 +42,6 @@ const ServiceSchema = new Schema<IService>(
 );
 
 ServiceSchema.index({ clinicId: 1, isActive: 1, order: 1 });
-ServiceSchema.index({ slug: 1 });
 
 export const Service: Model<IService> =
   mongoose.models.Service ?? mongoose.model<IService>("Service", ServiceSchema);

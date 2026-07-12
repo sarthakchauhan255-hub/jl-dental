@@ -44,7 +44,6 @@ const DoctorSchema = new Schema<IDoctor>(
 );
 
 DoctorSchema.index({ clinicId: 1, isActive: 1, order: 1 });
-DoctorSchema.index({ slug: 1 });
 
 export const Doctor: Model<IDoctor> =
   mongoose.models.Doctor ?? mongoose.model<IDoctor>("Doctor", DoctorSchema);

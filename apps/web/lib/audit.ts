@@ -82,6 +82,8 @@ export async function auditAuth(entry: {
 
 interface CmsAuditEntry {
   userId:     string;
+  userRole:   string;
+  userEmail?: string;
   action:     "create" | "update" | "delete" | "publish" | "archive";
   resource:   string;
   resourceId?: string;
@@ -98,6 +100,8 @@ export async function auditAction(entry: CmsAuditEntry): Promise<void> {
     const { AuditLog } = await import("../models/AuditLog");
     await (AuditLog as unknown as { create: (d: unknown) => Promise<unknown> }).create({
       userId:     entry.userId,
+      userRole:   entry.userRole,
+      userEmail:  entry.userEmail ?? null,
       action:     entry.action,
       resource:   entry.resource,
       resourceId: entry.resourceId ?? null,

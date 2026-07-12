@@ -15,7 +15,7 @@ const SENSITIVE_FIELDS = ["password", "passwordHash", "token", "secret", "hash",
 
 export interface CmsAuditContext {
   /** User performing the action */
-  actor:      { id: string; role: string };
+  actor:      { id: string; role: string; email?: string };
   /** The action being performed — matches CmsActionDefinition.auditAction */
   action:     "create" | "update" | "delete" | "publish" | "archive";
   /** Canonical resource name (e.g. "doctor", "blog_post") from CmsAuditConfig */
@@ -38,6 +38,8 @@ export async function emitCmsAudit(ctx: CmsAuditContext): Promise<void> {
     const { auditAction } = await import("@/lib/audit");
     await auditAction({
       userId:     ctx.actor.id,
+      userRole:   ctx.actor.role,
+      userEmail:  ctx.actor.email,
       action:     ctx.action,
       resource:   ctx.resource,
       resourceId: ctx.resourceId,

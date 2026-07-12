@@ -198,7 +198,6 @@ const ClinicSchema = new Schema<IClinic>(
   { timestamps: true }
 );
 
-ClinicSchema.index({ slug: 1 }, { unique: true });
 
 export const Clinic: Model<IClinic> =
   mongoose.models.Clinic ?? mongoose.model<IClinic>("Clinic", ClinicSchema);

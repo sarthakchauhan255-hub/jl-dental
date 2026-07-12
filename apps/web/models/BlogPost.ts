@@ -58,7 +58,6 @@ const BlogPostSchema = new Schema<IBlogPost>(
   { timestamps: true }
 );
 
-BlogPostSchema.index({ slug: 1 }, { unique: true });
 BlogPostSchema.index({ clinicId: 1, status: 1, publishedAt: -1 });
 BlogPostSchema.index({ tags: 1 });
 BlogPostSchema.index({ category: 1, status: 1 });

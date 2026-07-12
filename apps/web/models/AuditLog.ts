@@ -50,7 +50,7 @@ const AuditLogSchema = new Schema<IAuditLog>(
   {
     clinicId:      { type: Schema.Types.ObjectId, ref: "Clinic",   default: null },
     userId:        { type: Schema.Types.ObjectId, ref: "User",     required: true },
-    userEmail:     { type: String, required: true },
+    userEmail:     { type: String, required: false, default: null },
     userRole:      { type: String, required: true },
     action:        {
       type: String,
@@ -66,7 +66,7 @@ const AuditLogSchema = new Schema<IAuditLog>(
       enum: ["appointment", "doctor", "service", "blog_post", "gallery", "faq", "review", "clinic", "user", "media"],
       required: true,
     },
-    resourceId:    { type: String, required: true },
+    resourceId:    { type: String, required: false, default: null },
     resourceLabel: { type: String, default: "" },
     previousValue: { type: Schema.Types.Mixed, default: null },
     newValue:      { type: Schema.Types.Mixed, default: null },
