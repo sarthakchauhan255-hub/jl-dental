@@ -35,10 +35,16 @@ const nextConfig = {
   // ─── Redirects ─────────────────────────────────────────────────────────
   async redirects() {
     return [
-      // Normalize trailing slashes
+      // Bare /admin and /login → the login page (dashboard requires auth,
+      // so sending unauthenticated users to /admin/dashboard caused a loop)
       {
         source: "/admin",
-        destination: "/admin/dashboard",
+        destination: "/admin/login",
+        permanent: false,
+      },
+      {
+        source: "/login",
+        destination: "/admin/login",
         permanent: false,
       },
     ];

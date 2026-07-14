@@ -33,7 +33,12 @@ function classifyRoute(method: string, pathname: string): RouteType {
 // ─── Admin page protection ────────────────────────────────────────────────────
 async function handleAdminPage(req: NextRequest): Promise<NextResponse> {
   const { pathname } = req.nextUrl;
-  if (pathname === LOGIN_PATH) return NextResponse.next();
+  // Normalize trailing slash so "/admin/login/" also matches (prevents redirect loop)
+  const normalized = pathname.replace(/\/+$/, "") || "/";
+  if (normalized === LOGIN_PATH) return NextResponse.next();
+
+  // Bare "/admin" → send straight to login (avoids a 404 on the group root)
+  if (normalized === "/admin") return redirectToLogin(req);
 
   const token = req.cookies.get(AUTH_COOKIE)?.value;
   if (!token) return redirectToLogin(req);
@@ -82,6 +87,9 @@ function handleMutationOriginCheck(req: NextRequest): NextResponse | null {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function redirectToLogin(req: NextRequest): NextResponse {
+  const normalized = req.nextUrl.pathname.replace(/\/+$/, "") || "/";
+  // Safety: if we're already on the login path, don't redirect (loop guard)
+  if (normalized === LOGIN_PATH) return NextResponse.next();
   const url = req.nextUrl.clone();
   url.pathname = LOGIN_PATH;
   url.searchParams.set("from", req.nextUrl.pathname);
