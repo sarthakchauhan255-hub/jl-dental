@@ -18,3 +18,8 @@ dist/
 *.log
 .vercel
 *.tsbuildinfo
+
+apps/web/*.mjs
+apps/web/check-admin.mjs
+apps/web/activate-admin.mjs
+apps/web/reset-admin-password.mjs
