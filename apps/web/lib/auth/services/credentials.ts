@@ -28,8 +28,12 @@ export async function validateCredentials(
 ): Promise<ValidatedUser> {
   await connectDB();
 
+  // NOTE: use an explicit inclusion object — mixing "+field" with plain
+  // inclusion fields in a select() STRING makes Mongoose drop passwordHash
+  // (returns undefined), which silently breaks every login. Object form is
+  // unambiguous and reliably returns the hash.
   const user = await User.findOne({ email: email.toLowerCase().trim() })
-    .select("+passwordHash role isActive tokenVersion clinicId name email");
+    .select({ passwordHash: 1, role: 1, isActive: 1, tokenVersion: 1, clinicId: 1, name: 1, email: 1 });
 
   // Always run bcrypt — dummy hash used when user missing
   const hashToCompare = user?.passwordHash ?? AUTH.DUMMY_HASH;
