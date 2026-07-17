@@ -2,11 +2,9 @@ import type { Metadata } from "next";
 import { redirect }      from "next/navigation";
 import { getAuthUser }   from "@/lib/auth/session";
 import { hasPermission } from "@/lib/auth/rbac";
+import { BlogListClient } from "@/components/cms/engine/clients/blog-list-client";
 import { connectDB }     from "@/lib/db/connection";
 import { BlogPost }      from "@/models/BlogPost";
-import { ResourceListPage } from "@/components/cms/engine";
-import { blogConfig }  from "@/features/blog/config/blog.config";
-import { blogService } from "@/features/blog/service/blog.service";
 import type { BlogRecord } from "@/features/blog/service/blog.service";
 import { mapBlogPost }      from "@/lib/db/mappers";
 
@@ -26,9 +24,7 @@ export default async function BlogAdminPage() {
   const initialData: BlogRecord[] = docs.map(mapBlogPost) as BlogRecord[];
 
   return (
-    <ResourceListPage
-      config={blogConfig}
-      service={blogService}
+    <BlogListClient
       initialData={initialData}
       initialTotal={total}
       user={user}

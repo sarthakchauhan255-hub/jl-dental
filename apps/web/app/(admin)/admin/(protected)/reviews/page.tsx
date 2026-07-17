@@ -2,11 +2,9 @@ import type { Metadata }    from "next";
 import { redirect }         from "next/navigation";
 import { getAuthUser }      from "@/lib/auth/session";
 import { hasPermission }    from "@/lib/auth/rbac";
+import { ReviewsListClient } from "@/components/cms/engine/clients/reviews-list-client";
 import { connectDB }        from "@/lib/db/connection";
 import { Review }           from "@/models/Review";
-import { ResourceListPage } from "@/components/cms/engine";
-import { reviewConfig }     from "@/features/reviews/config/reviews.config";
-import { reviewService }    from "@/features/reviews/service/reviews.service";
 import type { ReviewRecord } from "@/features/reviews/service/reviews.service";
 import { mapReview }          from "@/lib/db/mappers";
 
@@ -26,9 +24,7 @@ export default async function ReviewsAdminPage() {
   const initialData: ReviewRecord[] = docs.map(mapReview) as ReviewRecord[];
 
   return (
-    <ResourceListPage
-      config={reviewConfig}
-      service={reviewService}
+    <ReviewsListClient
       initialData={initialData}
       initialTotal={total}
       user={user}

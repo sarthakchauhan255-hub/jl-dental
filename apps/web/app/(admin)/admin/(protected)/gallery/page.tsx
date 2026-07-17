@@ -2,11 +2,9 @@ import type { Metadata }    from "next";
 import { redirect }         from "next/navigation";
 import { getAuthUser }      from "@/lib/auth/session";
 import { hasPermission }    from "@/lib/auth/rbac";
+import { GalleryListClient } from "@/components/cms/engine/clients/gallery-list-client";
 import { connectDB }        from "@/lib/db/connection";
 import { Gallery }          from "@/models/Gallery";
-import { ResourceListPage } from "@/components/cms/engine";
-import { galleryConfig }    from "@/features/gallery/config/gallery.config";
-import { galleryService }   from "@/features/gallery/service/gallery.service";
 import type { GalleryRecord } from "@/features/gallery/service/gallery.service";
 import { mapGallery }          from "@/lib/db/mappers";
 
@@ -26,9 +24,7 @@ export default async function GalleryAdminPage() {
   const initialData: GalleryRecord[] = docs.map(mapGallery) as GalleryRecord[];
 
   return (
-    <ResourceListPage
-      config={galleryConfig}
-      service={galleryService}
+    <GalleryListClient
       initialData={initialData}
       initialTotal={total}
       user={user}

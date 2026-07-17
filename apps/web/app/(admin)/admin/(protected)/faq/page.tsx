@@ -2,11 +2,9 @@ import type { Metadata } from "next";
 import { redirect }      from "next/navigation";
 import { getAuthUser }   from "@/lib/auth/session";
 import { hasPermission } from "@/lib/auth/rbac";
+import { FaqListClient } from "@/components/cms/engine/clients/faq-list-client";
 import { connectDB }     from "@/lib/db/connection";
 import { FAQ }      from "@/models/FAQ";
-import { ResourceListPage } from "@/components/cms/engine";
-import { faqConfig }  from "@/features/faq/config/faq.config";
-import { faqService } from "@/features/faq/service/faq.service";
 import type { FaqRecord } from "@/features/faq/service/faq.service";
 import { mapFaq }          from "@/lib/db/mappers";
 
@@ -26,9 +24,7 @@ export default async function FaqAdminPage() {
   const initialData: FaqRecord[] = docs.map(mapFaq);
 
   return (
-    <ResourceListPage
-      config={faqConfig}
-      service={faqService}
+    <FaqListClient
       initialData={initialData}
       initialTotal={total}
       user={user}

@@ -2,11 +2,9 @@ import type { Metadata }    from "next";
 import { redirect }         from "next/navigation";
 import { getAuthUser }      from "@/lib/auth/session";
 import { hasPermission }    from "@/lib/auth/rbac";
+import { AppointmentsListClient } from "@/components/cms/engine/clients/appointments-list-client";
 import { connectDB }        from "@/lib/db/connection";
 import { Appointment }      from "@/models/Appointment";
-import { ResourceListPage } from "@/components/cms/engine";
-import { appointmentConfig } from "@/features/appointments/config/appointments.config";
-import { appointmentService } from "@/features/appointments/service/appointments.service";
 import type { AppointmentRecord } from "@/features/appointments/service/appointments.service";
 import { mapAppointmentList }      from "@/lib/db/mappers";
 
@@ -26,9 +24,7 @@ export default async function AppointmentsAdminPage() {
   const initialData: AppointmentRecord[] = docs.map(mapAppointmentList) as unknown as AppointmentRecord[];
 
   return (
-    <ResourceListPage
-      config={appointmentConfig}
-      service={appointmentService}
+    <AppointmentsListClient
       initialData={initialData}
       initialTotal={total}
       user={user}
