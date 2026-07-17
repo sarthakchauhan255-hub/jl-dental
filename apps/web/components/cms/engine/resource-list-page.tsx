@@ -94,6 +94,7 @@ export function ResourceListPage<T extends CmsRecord>({
         config={config}
         service={service}
         user={user}
+        allowCreate={allowCreate}
         onPageChange={handlePageChange}
         onRefresh={() => refresh()}
         toolbarSlot={toolbarSlot}

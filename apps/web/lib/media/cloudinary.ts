@@ -78,8 +78,16 @@ export async function uploadToCloudinary(
       },
       (error, result) => {
         if (error || !result) {
-          logger.service("Cloudinary", "upload", "failure", { error: String(error) });
-          resolve({ success: false, error: error?.message ?? "Upload failed" });
+          // NOTE: Cloudinary errors are objects — String(error) yields the
+          // useless "[object Object]". Surface the real fields instead.
+          const e = error as unknown as { message?: string; http_code?: number; name?: string } | null;
+          logger.service("Cloudinary", "upload", "failure", {
+            message:   e?.message   ?? "unknown",
+            httpCode:  e?.http_code ?? "n/a",
+            name:      e?.name      ?? "n/a",
+            raw:       JSON.stringify(error ?? {}),
+          });
+          resolve({ success: false, error: e?.message ?? "Upload failed" });
           return;
         }
 

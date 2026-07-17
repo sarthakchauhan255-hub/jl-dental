@@ -80,13 +80,15 @@ interface CmsTableProps<T extends CmsRecord> {
   user:         AuthUser | null;
   onPageChange: (page: number) => void;
   onRefresh?:   () => void;
+  /** Hide the empty-state Add button (resource has no /new page). */
+  allowCreate?: boolean;
   toolbarSlot?: React.ReactNode;
 }
 
 export function CmsTable<T extends CmsRecord>({
   data, total, page, pageSize = 10, loading,
   config, service, user,
-  onPageChange, onRefresh, toolbarSlot,
+  onPageChange, onRefresh, toolbarSlot, allowCreate = true,
 }: CmsTableProps<T>) {
   const router  = useRouter();
   const [pending, setPending] = useState<PendingAction | null>(null);
@@ -237,7 +239,7 @@ export function CmsTable<T extends CmsRecord>({
             <p className="text-sm font-medium text-charcoal-600">
               No {config.meta.labelPlural.toLowerCase()} yet
             </p>
-            {canPerform(user, config, "create") && (
+            {allowCreate && canPerform(user, config, "create") && (
               <Button size="sm" className="mt-3" onClick={() => router.push(`${config.routes.adminPath}/new`)}>
                 Add {config.meta.label}
               </Button>
