@@ -69,10 +69,11 @@ export async function uploadToCloudinary(
         public_id:   options.publicId,
         tags:        options.tags ?? [BRAND.CLOUDINARY_PREFIX],
         overwrite:   false,
-        // Auto format and quality — delivery optimization
-        format:      "auto",
-        quality:     "auto:good",
-        // Resource type
+        // NOTE: do NOT set format/quality "auto" here — f_auto/q_auto are
+        // DELIVERY-time parameters. Cloudinary rejects them on upload with
+        // "Invalid extension in transformation: auto" (HTTP 400). The original
+        // file is stored as-is; optimization happens in the delivery URL via
+        // lib/media/cloudinary-url.ts, which always applies f_auto + q_auto.
         resource_type: "image",
         transformation: options.transformation,
       },
