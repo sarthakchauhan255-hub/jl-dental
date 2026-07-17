@@ -1,15 +1,11 @@
 import type { Metadata }      from "next";
 import { notFound, redirect } from "next/navigation";
 import { getAuthUser }        from "@/lib/auth/session";
+import { FaqEditClient } from "@/components/cms/engine/clients/faq-edit-client";
 import { hasPermission }      from "@/lib/auth/rbac";
+import { mapFaq } from "@/lib/db/mappers";
 import { connectDB }          from "@/lib/db/connection";
 import { FAQ }                from "@/models/FAQ";
-import { ResourceEditPage }   from "@/components/cms/engine";
-import { faqConfig }          from "@/features/faq/config/faq.config";
-import { faqService }         from "@/features/faq/service/faq.service";
-import { FaqFormFields }      from "@/features/faq/components/faq-form-fields";
-import { faqUpdateSchema }    from "@/lib/validations";
-import type { ZodSchema }      from "zod";
 import type { FaqInput }       from "@/features/faq/service/faq.service";
 
 export const dynamic = "force-dynamic";
@@ -22,15 +18,12 @@ export default async function EditFaqPage({ params }: { params: Promise<{id:stri
   await connectDB();
   const doc = await FAQ.findById(id).lean();
   if (!doc) notFound();
+  const dto = mapFaq(doc);
   return (
-    <ResourceEditPage
-      config={faqConfig} service={faqService} schema={faqUpdateSchema as unknown as ZodSchema<FaqInput>}
-      record={{ id:String(doc._id), question:doc.question, answer:doc.answer,
-        category:doc.category??"General", order:doc.order, isActive:doc.isActive }}
+    <FaqEditClient
+      record={dto}
       defaultValues={{ question:doc.question, answer:doc.answer,
         category:doc.category??"General", order:doc.order, isActive:doc.isActive }}
-    >
-      {handle => <FaqFormFields handle={handle} />}
-    </ResourceEditPage>
+    />
   );
 }

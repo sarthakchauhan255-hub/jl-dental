@@ -1,15 +1,10 @@
 import type { Metadata }       from "next";
 import { notFound, redirect }  from "next/navigation";
 import { getAuthUser }         from "@/lib/auth/session";
+import { DoctorEditClient } from "@/components/cms/engine/clients/doctors-edit-client";
 import { hasPermission }       from "@/lib/auth/rbac";
 import { connectDB }           from "@/lib/db/connection";
 import { Doctor }              from "@/models/Doctor";
-import { ResourceEditPage }    from "@/components/cms/engine";
-import { doctorConfig }        from "@/features/doctors/config/doctors.config";
-import { doctorService }       from "@/features/doctors/service/doctors.service";
-import { DoctorFormFields }    from "@/features/doctors/components/doctor-form-fields";
-import { doctorUpdateSchema }   from "@/lib/validations";
-import type { ZodSchema }        from "zod";
 import type { DoctorInput }      from "@/features/doctors/service/doctors.service";
 import type { DoctorRecord }   from "@/features/doctors/service/doctors.service";
 
@@ -48,10 +43,7 @@ export default async function EditDoctorPage({
   };
 
   return (
-    <ResourceEditPage
-      config={doctorConfig}
-      service={doctorService}
-      schema={doctorUpdateSchema as unknown as ZodSchema<DoctorInput>}
+    <DoctorEditClient
       record={record}
       defaultValues={{
         name:           record.name,
@@ -63,8 +55,6 @@ export default async function EditDoctorPage({
         isActive:       record.isActive,
         seo:            record.seo,
       }}
-    >
-      {handle => <DoctorFormFields handle={handle} isEdit />}
-    </ResourceEditPage>
+    />
   );
 }

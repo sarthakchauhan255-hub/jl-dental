@@ -27,18 +27,22 @@ interface ResourceListPageProps<T extends CmsRecord> {
   /** Extra content in the page header actions slot */
   headerActions?: React.ReactNode;
   /** Extra toolbar content (filter dropdowns etc.) */
+  /** Force-hide the Add button (resources with no /new page, e.g. reviews are
+   *  patient-submitted and appointments come from public bookings). */
+  allowCreate?: boolean;
   toolbarSlot?: React.ReactNode;
 }
 
 export function ResourceListPage<T extends CmsRecord>({
   config, service, initialData, initialTotal, user, headerActions, toolbarSlot,
+  allowCreate = true,
 }: ResourceListPageProps<T>) {
   const [data,    setData]    = useState<T[]>(initialData);
   const [total,   setTotal]   = useState(initialTotal);
   const [page,    setPage]    = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const canCreate = canPerform(user, config, "create");
+  const canCreate = allowCreate && canPerform(user, config, "create");
 
   const refresh = useCallback(async (p = page) => {
     setLoading(true);

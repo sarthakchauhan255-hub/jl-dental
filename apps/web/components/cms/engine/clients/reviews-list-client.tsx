@@ -6,6 +6,8 @@
  * action executors, service methods). Next.js forbids passing functions from a
  * Server Component to a Client Component. This wrapper imports them on the
  * client side instead, so the server page only passes serializable data.
+ *
+ * allowCreate=false: reviews have no /new page by design — reviews are submitted by patients and only moderated here.
  */
 import { ResourceListPage } from "@/components/cms/engine";
 import { reviewConfig } from "@/features/reviews/config/reviews.config";
@@ -27,6 +29,7 @@ export function ReviewsListClient({
       initialData={initialData}
       initialTotal={initialTotal}
       user={user}
+      allowCreate={false}
     />
   );
 }

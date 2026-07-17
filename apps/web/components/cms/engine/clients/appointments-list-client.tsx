@@ -6,6 +6,8 @@
  * action executors, service methods). Next.js forbids passing functions from a
  * Server Component to a Client Component. This wrapper imports them on the
  * client side instead, so the server page only passes serializable data.
+ *
+ * allowCreate=false: appointments have no /new page by design — appointments originate from public bookings, not admin entry.
  */
 import { ResourceListPage } from "@/components/cms/engine";
 import { appointmentConfig } from "@/features/appointments/config/appointments.config";
@@ -27,6 +29,7 @@ export function AppointmentsListClient({
       initialData={initialData}
       initialTotal={initialTotal}
       user={user}
+      allowCreate={false}
     />
   );
 }

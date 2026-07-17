@@ -1,16 +1,11 @@
 import type { Metadata }     from "next";
 import { notFound, redirect } from "next/navigation";
 import { getAuthUser }       from "@/lib/auth/session";
+import { ServiceEditClient } from "@/components/cms/engine/clients/services-edit-client";
 import { hasPermission }     from "@/lib/auth/rbac";
+import { mapService } from "@/lib/db/mappers";
 import { connectDB }         from "@/lib/db/connection";
 import { Service }           from "@/models/Service";
-import { ResourceEditPage }  from "@/components/cms/engine";
-import { serviceConfig }     from "@/features/services/config/services.config";
-import { serviceService }    from "@/features/services/service/services.service";
-import { ServiceFormFields } from "@/features/services/components/service-form-fields";
-import { serviceUpdateSchema } from "@/lib/validations";
-import { mapService }           from "@/lib/db/mappers";
-import type { ZodSchema } from "zod";
 import type { ServiceInput } from "@/features/services/service/services.service";
 
 export const dynamic = "force-dynamic";
@@ -25,14 +20,11 @@ export default async function EditServicePage({ params }: { params: Promise<{id:
   if (!rawDoc) notFound();
   const dto = mapService(rawDoc);
   return (
-    <ResourceEditPage
-      config={serviceConfig} service={serviceService} schema={serviceUpdateSchema as unknown as ZodSchema<ServiceInput>}
-      record={dto as unknown as import("@/features/services/service/services.service").ServiceRecord}
+    <ServiceEditClient
+      record={dto}
       defaultValues={{ name: dto.name, slug: dto.slug, shortDesc: dto.shortDesc,
         fullContent: dto.fullContent, icon: dto.icon, order: dto.order,
         isActive: dto.isActive, isFeatured: dto.isFeatured }}
-    >
-      {handle => <ServiceFormFields handle={handle} isEdit />}
-    </ResourceEditPage>
+    />
   );
 }
