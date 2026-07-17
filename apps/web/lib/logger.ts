@@ -10,7 +10,10 @@
  */
 import { BRAND } from "@/config/branding";
 import { TECH } from "@/config/technical";
-import { env } from "@/env";
+// NOTE: do NOT import "@/env" here — the logger is imported (transitively) by
+// CMS configs that run in client components, and the env proxy throws when a
+// server-only variable is touched on the client. process.env.NODE_ENV is
+// inlined by Next at build time and is safe in both runtimes.
 
 
 type LogLevel = "debug" | "info" | "warn" | "error";
@@ -32,8 +35,8 @@ function sanitizeMeta(meta: LogMeta): LogMeta {
   );
 }
 
-const isDev  = env.NODE_ENV === "development";
-const isProd = env.NODE_ENV === "production";
+const isDev  = process.env.NODE_ENV === "development";
+const isProd = process.env.NODE_ENV === "production";
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 function formatDev(level: LogLevel, message: string, meta?: LogMeta): void {
