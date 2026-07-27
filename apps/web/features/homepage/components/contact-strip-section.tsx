@@ -1,5 +1,6 @@
 import { MapPin, Phone, Clock } from "lucide-react";
 import { Section } from "@/components/common/section";
+import { GoogleReviewButton } from "@/components/common/google-review-button";
 import type { ClinicPublicContent } from "@/features/clinic/schemas/clinic-public.schema";
 
 export function ContactStripSection({ clinic }: { clinic: ClinicPublicContent }) {
@@ -57,6 +58,7 @@ export function ContactStripSection({ clinic }: { clinic: ClinicPublicContent })
               Get Directions
             </a>
           )}
+          <GoogleReviewButton className="mt-3 w-full sm:w-auto" />
         </div>
       </div>
     </Section>

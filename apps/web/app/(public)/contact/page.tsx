@@ -6,6 +6,7 @@ import { getCmsProvider } from "@/features/shared/cms";
 import { resolveMetadata } from "@/lib/seo";
 import { REVALIDATE }     from "@/lib/cache";
 import { BRAND } from "@/config/branding";
+import { GoogleReviewButton } from "@/components/common/google-review-button";
 
 export const revalidate = REVALIDATE.contact;
 
@@ -104,6 +105,8 @@ export default async function ContactPage() {
               Get Directions
             </a>
           )}
+          <GoogleReviewButton className="mt-3 w-full sm:w-auto" />
+
         </Reveal>
       </div>
     </Section>
