@@ -21,6 +21,7 @@ import { GalleryPreviewSection }     from "@/features/homepage/components/galler
 import { FaqPreviewSection }         from "@/features/homepage/components/faq-preview-section";
 import { CtaBlockSection }           from "@/features/homepage/components/cta-block-section";
 import { ContactStripSection }       from "@/features/homepage/components/contact-strip-section";
+import { GoogleTestimonialsSection } from "@/features/homepage/components/google-testimonials-section";
 
 export const revalidate = REVALIDATE.homepage;
 
@@ -67,6 +68,8 @@ export default async function HomePage() {
       <FaqPreviewSection      content={mapFaqPreview(sections.faqPreview)} faqs={faqs} />
       <CtaBlockSection        content={mapCtaBlock(sections.ctaBlock)} />
       <ContactStripSection    clinic={clinic} />
+      <GoogleTestimonialsSection />
+      
     </>
   );
 }
