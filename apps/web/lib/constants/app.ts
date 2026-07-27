@@ -59,7 +59,7 @@ export const ADMIN_NAV_LINKS = [
   { label: "Gallery",         href: "/admin/gallery",   icon: "Images" },
   { label: "Blog",            href: "/admin/blog",      icon: "FileText" },
   { label: "FAQ",             href: "/admin/faq",       icon: "HelpCircle" },
-  { label: "Reviews",         href: "/admin/reviews",       icon: "Star"     },
+  //{ label: "Reviews",         href: "/admin/reviews",       icon: "Star"     },
   { label: "Appointments",    href: "/admin/appointments",  icon: "Calendar"  },
 ] as const;
 
