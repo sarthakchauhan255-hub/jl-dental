@@ -11,6 +11,9 @@ import { useRouter } from "next/navigation";
 import { Button }        from "@/components/ui/button";
 import { Input }         from "@/components/ui/input";
 import { Textarea }      from "@/components/ui/textarea";
+import {
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+} from "@/components/ui/select";
 import { ConfirmDialog } from "@/components/cms/confirm-dialog";
 import { SectionCard }   from "@/components/cms/section-card";
 import { FormField }     from "@/components/cms/form-field";
@@ -30,22 +33,26 @@ const ACTION_LABELS: Partial<Record<AppointmentStatus, string>> = {
 
 const DESTRUCTIVE: AppointmentStatus[] = ["rejected", "cancelled", "no_show"];
 
+// ─── Appointment slots ────────────────────────────────────────────────────────
+/** Change to 15 for quarter-hour granularity. */
+const SLOT_MINUTES = 30;
+const START_HOUR   = 9;   // first slot  9:00 AM
+const END_HOUR     = 19;  // last slot   7:00 PM
+
 /**
- * Selectable appointment slots, 8:00 AM – 8:00 PM in 15-minute steps.
  * LABEL is 12-hour (what staff and patients read); VALUE stays 24-hour "HH:mm"
  * so the API contract and stored data are unchanged.
  */
 const TIME_SLOTS: { value: string; label: string }[] = (() => {
   const slots: { value: string; label: string }[] = [];
-  for (let h = 8; h <= 20; h++) {
-    for (const m of [0, 15, 30, 45]) {
-      if (h === 20 && m > 0) break;               // stop at 8:00 PM
-      const hh = String(h).padStart(2, "0");
-      const mm = String(m).padStart(2, "0");
-      const h12 = h % 12 === 0 ? 12 : h % 12;
-      const period = h < 12 ? "AM" : "PM";
-      slots.push({ value: `${hh}:${mm}`, label: `${h12}:${mm} ${period}` });
-    }
+  for (let mins = START_HOUR * 60; mins <= END_HOUR * 60; mins += SLOT_MINUTES) {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    const hh = String(h).padStart(2, "0");
+    const mm = String(m).padStart(2, "0");
+    const h12 = h % 12 === 0 ? 12 : h % 12;
+    const period = h < 12 ? "AM" : "PM";
+    slots.push({ value: `${hh}:${mm}`, label: `${h12}:${mm} ${period}` });
   }
   return slots;
 })();
@@ -54,11 +61,6 @@ const TIME_SLOTS: { value: string; label: string }[] = (() => {
 function to12Hour(value: string): string {
   return TIME_SLOTS.find(s => s.value === value)?.label ?? value;
 }
-
-const SELECT_CLASS =
-  "w-full rounded-lg border border-input bg-background px-3 py-2 text-sm " +
-  "focus:border-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-700/10 " +
-  "disabled:cursor-not-allowed disabled:bg-muted";
 
 interface Props {
   appointmentId: string;
@@ -138,18 +140,18 @@ export function AppointmentDetailActions({
             />
           </FormField>
           <FormField id="confirmedTime" label="Confirmed Time">
-            <select
-              id="confirmedTime"
-              value={time}
-              onChange={e => setTime(e.target.value)}
-              disabled={busy}
-              className={SELECT_CLASS}
-            >
-              <option value="">Select a time…</option>
-              {TIME_SLOTS.map(slot => (
-                <option key={slot.value} value={slot.value}>{slot.label}</option>
-              ))}
-            </select>
+            <Select value={time} onValueChange={setTime} disabled={busy}>
+              <SelectTrigger id="confirmedTime">
+                <SelectValue placeholder="Select a time…" />
+              </SelectTrigger>
+              {/* overflow-y-auto overrides the panel's overflow-hidden so the
+                  fixed-height list scrolls internally instead of being clipped. */}
+              <SelectContent className="max-h-72 overflow-y-auto">
+                {TIME_SLOTS.map(slot => (
+                  <SelectItem key={slot.value} value={slot.value}>{slot.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </FormField>
         </div>
 
