@@ -30,6 +30,36 @@ const ACTION_LABELS: Partial<Record<AppointmentStatus, string>> = {
 
 const DESTRUCTIVE: AppointmentStatus[] = ["rejected", "cancelled", "no_show"];
 
+/**
+ * Selectable appointment slots, 8:00 AM – 8:00 PM in 15-minute steps.
+ * LABEL is 12-hour (what staff and patients read); VALUE stays 24-hour "HH:mm"
+ * so the API contract and stored data are unchanged.
+ */
+const TIME_SLOTS: { value: string; label: string }[] = (() => {
+  const slots: { value: string; label: string }[] = [];
+  for (let h = 8; h <= 20; h++) {
+    for (const m of [0, 15, 30, 45]) {
+      if (h === 20 && m > 0) break;               // stop at 8:00 PM
+      const hh = String(h).padStart(2, "0");
+      const mm = String(m).padStart(2, "0");
+      const h12 = h % 12 === 0 ? 12 : h % 12;
+      const period = h < 12 ? "AM" : "PM";
+      slots.push({ value: `${hh}:${mm}`, label: `${h12}:${mm} ${period}` });
+    }
+  }
+  return slots;
+})();
+
+/** "14:30" → "2:30 PM" (for the summary line). */
+function to12Hour(value: string): string {
+  return TIME_SLOTS.find(s => s.value === value)?.label ?? value;
+}
+
+const SELECT_CLASS =
+  "w-full rounded-lg border border-input bg-background px-3 py-2 text-sm " +
+  "focus:border-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-700/10 " +
+  "disabled:cursor-not-allowed disabled:bg-muted";
+
 interface Props {
   appointmentId: string;
   currentStatus: AppointmentStatus;
@@ -43,14 +73,17 @@ export function AppointmentDetailActions({
 }: Props) {
   const router = useRouter();
   const [date, setDate]     = useState(confirmedDate ?? "");
-  const [time, setTime]     = useState(confirmedTime ?? "");
+  // Trim any seconds ("14:30:00" → "14:30") so a stored value preselects correctly.
+  const [time, setTime]     = useState((confirmedTime ?? "").slice(0, 5));
   const [note, setNote]     = useState(notes);
   const [busy, setBusy]     = useState(false);
   const [error, setError]   = useState<string | null>(null);
   const [pending, setPending] = useState<AppointmentStatus | null>(null);
 
-  const allowed = APPOINTMENT_TRANSITIONS[currentStatus] ?? [];
+  const allowed    = APPOINTMENT_TRANSITIONS[currentStatus] ?? [];
   const isTerminal = allowed.length === 0;
+  /** Approval needs both fields — disable the button rather than fail server-side. */
+  const scheduleReady = Boolean(date && time);
 
   async function execute(target: AppointmentStatus) {
     setBusy(true);
@@ -94,7 +127,7 @@ export function AppointmentDetailActions({
   }
 
   return (
-    <SectionCard title="Workflow" description="Confirmed date and time are required for approval. All transitions are validated server-side.">
+    <SectionCard title="Workflow" description="Set the confirmed date and time, then approve. The patient is emailed automatically.">
       <div className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField id="confirmedDate" label="Confirmed Date">
@@ -105,13 +138,30 @@ export function AppointmentDetailActions({
             />
           </FormField>
           <FormField id="confirmedTime" label="Confirmed Time">
-            <Input
-              id="confirmedTime" type="time" value={time}
+            <select
+              id="confirmedTime"
+              value={time}
               onChange={e => setTime(e.target.value)}
               disabled={busy}
-            />
+              className={SELECT_CLASS}
+            >
+              <option value="">Select a time…</option>
+              {TIME_SLOTS.map(slot => (
+                <option key={slot.value} value={slot.value}>{slot.label}</option>
+              ))}
+            </select>
           </FormField>
         </div>
+
+        {/* Plain-language confirmation of exactly what the patient will be told. */}
+        {scheduleReady && (
+          <p className="rounded-lg bg-primary-50 px-3 py-2 text-sm text-primary-800">
+            Patient will be confirmed for{" "}
+            <strong>{new Date(`${date}T00:00:00`).toLocaleDateString("en-IN", {
+              weekday: "long", day: "numeric", month: "long", year: "numeric",
+            })}</strong>{" "}at <strong>{to12Hour(time)}</strong>.
+          </p>
+        )}
 
         <FormField id="adminNotes" label="Internal Notes" hint="Visible to staff only. Max 500 characters.">
           <Textarea
@@ -123,13 +173,19 @@ export function AppointmentDetailActions({
 
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
 
+        {allowed.includes("approved") && !scheduleReady && (
+          <p className="text-sm text-muted-foreground">
+            Select a confirmed date and time to enable approval.
+          </p>
+        )}
+
         <div className="flex flex-wrap gap-2 border-t border-border pt-4">
           {allowed.map(target => (
             <Button
               key={target}
               size="sm"
               variant={DESTRUCTIVE.includes(target) ? "destructive" : target === "approved" || target === "completed" ? "primary" : "secondary"}
-              disabled={busy}
+              disabled={busy || (target === "approved" && !scheduleReady)}
               onClick={() => trigger(target)}
             >
               {ACTION_LABELS[target] ?? target}
