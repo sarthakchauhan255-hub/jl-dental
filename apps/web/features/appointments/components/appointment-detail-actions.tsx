@@ -2,15 +2,14 @@
 /**
  * AppointmentDetailActions — workflow actions for the appointment detail page.
  *
- * Renders only transitions valid FROM the current status (client visibility);
- * the server independently re-validates every transition (422 on invalid).
- * Approval requires confirmed date + time (also server-enforced).
+ * Handles status transitions (Approve/Reject/Complete/…) with a confirmed
+ * date + 12-hour time picker. Patient-submitted notes are shown READ-ONLY on
+ * the detail page (Request card) — they are never editable here.
  */
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button }        from "@/components/ui/button";
 import { Input }         from "@/components/ui/input";
-import { Textarea }      from "@/components/ui/textarea";
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from "@/components/ui/select";
@@ -33,16 +32,11 @@ const ACTION_LABELS: Partial<Record<AppointmentStatus, string>> = {
 
 const DESTRUCTIVE: AppointmentStatus[] = ["rejected", "cancelled", "no_show"];
 
-// ─── Appointment slots ────────────────────────────────────────────────────────
-/** Change to 15 for quarter-hour granularity. */
+// ─── Appointment slots (12-hour labels, 24-hour values) ───────────────────────
 const SLOT_MINUTES = 30;
-const START_HOUR   = 9;   // first slot  9:00 AM
-const END_HOUR     = 19;  // last slot   7:00 PM
+const START_HOUR   = 9;
+const END_HOUR     = 19;
 
-/**
- * LABEL is 12-hour (what staff and patients read); VALUE stays 24-hour "HH:mm"
- * so the API contract and stored data are unchanged.
- */
 const TIME_SLOTS: { value: string; label: string }[] = (() => {
   const slots: { value: string; label: string }[] = [];
   for (let mins = START_HOUR * 60; mins <= END_HOUR * 60; mins += SLOT_MINUTES) {
@@ -57,7 +51,6 @@ const TIME_SLOTS: { value: string; label: string }[] = (() => {
   return slots;
 })();
 
-/** "14:30" → "2:30 PM" (for the summary line). */
 function to12Hour(value: string): string {
   return TIME_SLOTS.find(s => s.value === value)?.label ?? value;
 }
@@ -67,24 +60,20 @@ interface Props {
   currentStatus: AppointmentStatus;
   confirmedDate: string | null;
   confirmedTime: string | null;
-  notes:         string;
 }
 
 export function AppointmentDetailActions({
-  appointmentId, currentStatus, confirmedDate, confirmedTime, notes,
+  appointmentId, currentStatus, confirmedDate, confirmedTime,
 }: Props) {
   const router = useRouter();
-  const [date, setDate]     = useState(confirmedDate ?? "");
-  // Trim any seconds ("14:30:00" → "14:30") so a stored value preselects correctly.
-  const [time, setTime]     = useState((confirmedTime ?? "").slice(0, 5));
-  const [note, setNote]     = useState(notes);
-  const [busy, setBusy]     = useState(false);
-  const [error, setError]   = useState<string | null>(null);
+  const [date, setDate]       = useState(confirmedDate ?? "");
+  const [time, setTime]       = useState((confirmedTime ?? "").slice(0, 5));
+  const [busy, setBusy]       = useState(false);
+  const [error, setError]     = useState<string | null>(null);
   const [pending, setPending] = useState<AppointmentStatus | null>(null);
 
-  const allowed    = APPOINTMENT_TRANSITIONS[currentStatus] ?? [];
-  const isTerminal = allowed.length === 0;
-  /** Approval needs both fields — disable the button rather than fail server-side. */
+  const allowed       = APPOINTMENT_TRANSITIONS[currentStatus] ?? [];
+  const isTerminal    = allowed.length === 0;
   const scheduleReady = Boolean(date && time);
 
   async function execute(target: AppointmentStatus) {
@@ -98,14 +87,10 @@ export function AppointmentDetailActions({
           status: target,
           ...(date ? { confirmedDate: date } : {}),
           ...(time ? { confirmedTime: time } : {}),
-          ...(note ? { adminNotes: note } : {}),
         }),
       });
-      const json = await res.json() as { success: boolean; error?: string; fields?: Record<string, string> };
-      if (!json.success) {
-        setError(json.error ?? "Update failed.");
-        return;
-      }
+      const json = await res.json() as { success: boolean; error?: string };
+      if (!json.success) { setError(json.error ?? "Update failed."); return; }
       router.refresh();
     } catch {
       setError("Network error — please retry.");
@@ -144,8 +129,6 @@ export function AppointmentDetailActions({
               <SelectTrigger id="confirmedTime">
                 <SelectValue placeholder="Select a time…" />
               </SelectTrigger>
-              {/* overflow-y-auto overrides the panel's overflow-hidden so the
-                  fixed-height list scrolls internally instead of being clipped. */}
               <SelectContent className="max-h-72 overflow-y-auto">
                 {TIME_SLOTS.map(slot => (
                   <SelectItem key={slot.value} value={slot.value}>{slot.label}</SelectItem>
@@ -155,7 +138,6 @@ export function AppointmentDetailActions({
           </FormField>
         </div>
 
-        {/* Plain-language confirmation of exactly what the patient will be told. */}
         {scheduleReady && (
           <p className="rounded-lg bg-primary-50 px-3 py-2 text-sm text-primary-800">
             Patient will be confirmed for{" "}
@@ -164,14 +146,6 @@ export function AppointmentDetailActions({
             })}</strong>{" "}at <strong>{to12Hour(time)}</strong>.
           </p>
         )}
-
-        <FormField id="adminNotes" label="Internal Notes" hint="Visible to staff only. Max 500 characters.">
-          <Textarea
-            id="adminNotes" value={note} maxLength={500} rows={3}
-            onChange={e => setNote(e.target.value)}
-            disabled={busy}
-          />
-        </FormField>
 
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
 

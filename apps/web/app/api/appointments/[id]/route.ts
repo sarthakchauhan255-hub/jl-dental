@@ -67,8 +67,8 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     const update: Record<string, unknown> = { status: newStatus };
     if (body.confirmedDate !== undefined) update.confirmedDate = body.confirmedDate;
     if (body.confirmedTime !== undefined) update.confirmedTime = body.confirmedTime;
-    // Schema field is adminNotes; model field is notes (approved field, max 500)
-    if (body.adminNotes) update.notes = body.adminNotes.slice(0, 500);
+    // Staff notes → dedicated private field (never shown to patient)
+    if (body.adminNotes !== undefined) update.adminNotes = body.adminNotes.slice(0, 1000);
 
     const rawUpdated = await Appointment.findByIdAndUpdate(id, {
       $set: update,

@@ -88,6 +88,12 @@ export default async function AppointmentDetailPage({ params }: { params: Promis
                   <dd className="whitespace-pre-wrap text-charcoal-900">{appt.message}</dd>
                 </div>
               )}
+              {appt.notes && (
+                <div className="sm:col-span-2">
+                  <dt className="font-medium text-charcoal-500">Additional Info (from patient)</dt>
+                  <dd className="whitespace-pre-wrap text-charcoal-900">{appt.notes}</dd>
+                </div>
+              )}
             </dl>
           </SectionCard>
         </div>
@@ -108,7 +114,6 @@ export default async function AppointmentDetailPage({ params }: { params: Promis
               currentStatus={appt.status as AppointmentStatus}
               confirmedDate={appt.confirmedDate}
               confirmedTime={appt.confirmedTime}
-              notes={appt.notes}
             />
           )}
         </div>
