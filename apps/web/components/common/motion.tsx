@@ -102,7 +102,7 @@ export function HoverCard({
 interface ScrollFadeProps {
   children:   React.ReactNode;
   className?: string;
-  /** Rise/drift distance in px (default 48). */
+  /** Rise distance (px) for the card entering from below (default 48). */
   rise?:      number;
   /** Opacity floor at the extremes — lower = stronger fade (default 0.04). */
   floor?:     number;
@@ -110,9 +110,10 @@ interface ScrollFadeProps {
 
 /**
  * ScrollFade — opacity + drift driven by the element's position in the viewport.
- * Narrow crisp window in the centre (~one to two cards), strong fade elsewhere.
- * Unlike Reveal (fires once on enter), this is continuous and reverses on scroll.
- * Respects reduced-motion (renders static, fully visible).
+ * Narrow crisp window in the centre; strong fade elsewhere.
+ *  • Entering (from below): fade in + rise, at full size.
+ *  • Leaving  (at the top):  fade out + shrink, receding into the background.
+ * Continuous and reverses on scroll. Respects reduced-motion (static, visible).
  */
 export function ScrollFade({ children, className, rise = 48, floor = 0.04 }: ScrollFadeProps) {
   const ref           = useRef<HTMLDivElement>(null);
@@ -124,8 +125,10 @@ export function ScrollFade({ children, className, rise = 48, floor = 0.04 }: Scr
   });
 
   const opacity = useTransform(scrollYProgress, [0, 0.42, 0.58, 1], [floor, 1, 1, floor]);
-  const y       = useTransform(scrollYProgress, [0, 0.42, 0.58, 1], [rise, 0, 0, -rise]);
-  const scale   = useTransform(scrollYProgress, [0, 0.42, 0.58, 1], [0.98, 1, 1, 0.98]);
+  // Enter rises from below; leave drifts up only slightly (shrink carries it back).
+  const y       = useTransform(scrollYProgress, [0, 0.42, 0.58, 1], [rise, 0, 0, -16]);
+  // No shrink on entry (stays 1); shrink only as it leaves the top.
+  const scale   = useTransform(scrollYProgress, [0, 0.42, 0.58, 1], [1, 1, 1, 0.8]);
 
   if (reducedMotion) {
     return <div ref={ref} className={className}>{children}</div>;
