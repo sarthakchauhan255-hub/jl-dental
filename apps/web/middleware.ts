@@ -46,7 +46,10 @@ async function handleAdminPage(req: NextRequest): Promise<NextResponse> {
   const { pathname } = req.nextUrl;
   // Normalize trailing slash so "/admin/login/" also matches (prevents redirect loop)
   const normalized = pathname.replace(/\/+$/, "") || "/";
-  if (normalized === LOGIN_PATH) return NextResponse.next();
+  // Public auth pages — reachable WITHOUT a session. Forgot/reset password are
+  // used precisely when the admin is logged OUT, so they must not be guarded.
+  const PUBLIC_AUTH_PATHS = ["/admin/login", "/admin/forgot-password", "/admin/reset-password"];
+  if (PUBLIC_AUTH_PATHS.includes(normalized)) return NextResponse.next();
 
   // Bare "/admin" → send straight to login (avoids a 404 on the group root)
   if (normalized === "/admin") return redirectToLogin(req);
