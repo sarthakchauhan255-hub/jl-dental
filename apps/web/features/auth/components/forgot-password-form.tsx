@@ -15,7 +15,7 @@ export function ForgotPasswordForm() {
     if (loading || !email) return;
     setLoading(true);
     try {
-      await fetch("/api/auth/reset-password", {
+      await fetch("/api/auth/forgot-password", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({ email: email.trim() }),
