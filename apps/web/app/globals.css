@@ -3,7 +3,7 @@
    On Vercel production: replaced by next/font/google for CDN delivery + CLS prevention.
    Loaded with font-display: swap to prevent FOIT.
 ─────────────────────────────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -18,44 +18,45 @@
   /* ─── CSS Variables: Brand Design Tokens ──────────────────────────────── */
   :root {
     /* Background & Surface */
-    --background:        0 0% 100%;
-    --foreground:        220 15% 12%;
+    --background:        40 40% 96%;
+    --foreground:        28 14% 13%;
 
     /* Primary — Luxury Dental Blue */
-    --primary:           210 65% 28%;
-    --primary-foreground:0 0% 100%;
-    --primary-50:        210 80% 97%;
-    --primary-100:       210 75% 93%;
-    --primary-200:       210 70% 85%;
-    --primary-300:       210 65% 72%;
-    --primary-400:       210 65% 55%;
-    --primary-500:       210 65% 40%;
-    --primary-600:       210 65% 32%;
-    --primary-700:       210 65% 28%;
-    --primary-800:       210 65% 20%;
-    --primary-900:       210 65% 14%;
+    --primary:           199 62% 22%;
+    --primary-foreground:40 40% 97%;
+    --primary-50:        198 50% 96%;
+    --primary-100:       198 48% 90%;
+    --primary-200:       197 45% 78%;
+    --primary-300:       197 46% 62%;
+    --primary-400:       197 50% 46%;
+    --primary-500:       198 55% 35%;
+    --primary-600:       199 58% 28%;
+    --primary-700:       199 62% 22%;
+    --primary-800:       199 63% 17%;
+    --primary-900:       199 64% 13%;
 
     /* Secondary — Deep Charcoal */
-    --secondary:         220 15% 18%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary:         28 12% 18%;
+    --secondary-foreground: 40 30% 97%;
 
     /* Accent — Warm Gold for luxury highlights */
-    --accent:            45 85% 55%;
-    --accent-foreground: 220 15% 10%;
-    --accent-gold:       42 90% 48%;
+    --accent:            42 78% 55%;
+    --accent-foreground: 28 20% 12%;
+    --accent-gold:       38 52% 52%;
+    --accent-cyan:       198 75% 52%;
 
     /* Muted — Soft neutral grays */
-    --muted:             210 20% 96%;
-    --muted-foreground:  220 10% 48%;
+    --muted:             40 24% 93%;
+    --muted-foreground:  30 8% 44%;
 
     /* Card */
     --card:              0 0% 100%;
-    --card-foreground:   220 15% 12%;
+    --card-foreground:   28 14% 13%;
 
     /* UI Elements */
-    --border:            210 20% 90%;
-    --input:             210 20% 94%;
-    --ring:              210 65% 40%;
+    --border:            38 22% 87%;
+    --input:             38 20% 91%;
+    --ring:              198 55% 40%;
 
     /* Status */
     --destructive:       0 72% 51%;
@@ -67,9 +68,9 @@
 
 
     /* Font family variables */
-    --font-sans:    "Inter", system-ui, -apple-system, sans-serif;
-    --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
-    --font-serif:   "Playfair Display", Georgia, serif;
+    --font-sans:    "Hanken Grotesk", system-ui, -apple-system, sans-serif;
+    --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+    --font-serif:   "Fraunces", Georgia, serif;
     --font-mono:    "Fira Code", "Cascadia Code", ui-monospace, monospace;
 
     /* Border radius scale — shadcn compat */
@@ -80,7 +81,7 @@
   .dark {
     --background:        220 20% 8%;
     --foreground:        210 20% 95%;
-    --primary:           210 65% 55%;
+    --primary:           198 60% 55%;
     --primary-foreground:220 20% 8%;
     --secondary:         220 15% 16%;
     --secondary-foreground: 210 20% 95%;
@@ -92,7 +93,7 @@
     --card-foreground:   210 20% 95%;
     --border:            220 15% 20%;
     --input:             220 15% 16%;
-    --ring:              210 65% 55%;
+    --ring:              198 60% 55%;
   }
 
   /* ─── Base HTML Reset ──────────────────────────────────────────────────── */
@@ -118,7 +119,7 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family: "Hanken Grotesk", system-ui, -apple-system, sans-serif;
     font-size: 1rem;
     line-height: 1.625;
     -webkit-font-smoothing: antialiased;

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
+import { Fraunces, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 import { env } from "@/env";
 import { getBrandAssets, BRAND } from "@/config/branding";
@@ -9,26 +9,19 @@ import { getBrandAssets, BRAND } from "@/config/branding";
  * next/font/local reads real font metrics → calculates size-adjust fallback → zero CLS.
  * Update fonts: see /public/fonts/README.md
  */
-const inter = localFont({
-  src:                "../public/fonts/inter-var.woff2",
-  variable:           "--font-sans",
-  display:            "swap",
-  preload:            true,
-  adjustFontFallback: "Arial",
-  fallback:           ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
-  weight:             "100 900",
+const hanken = Hanken_Grotesk({
+  subsets:  ["latin"],
+  variable: "--font-sans",
+  display:  "swap",
+  weight:   ["400", "500", "600"],
 });
 
-const playfair = localFont({
-  src: [
-    { path: "../public/fonts/playfair-var.woff2",        style: "normal", weight: "400 900" },
-    { path: "../public/fonts/playfair-var-italic.woff2", style: "italic", weight: "400 900" },
-  ],
-  variable:           "--font-display",
-  display:            "swap",
-  preload:            true,
-  adjustFontFallback: "Times New Roman",
-  fallback:           ["Georgia", "Times New Roman", "serif"],
+const fraunces = Fraunces({
+  subsets:  ["latin"],
+  variable: "--font-display",
+  display:  "swap",
+  weight:   ["400", "500", "600"],
+  style:    ["normal", "italic"],
 });
 
 const brand = getBrandAssets();
@@ -77,7 +70,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${hanken.variable} ${fraunces.variable}`} suppressHydrationWarning>
       <body className="antialiased bg-background text-foreground font-sans">
         {children}
       </body>
