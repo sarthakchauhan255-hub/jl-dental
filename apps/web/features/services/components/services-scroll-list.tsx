@@ -69,7 +69,7 @@ function MobileStack({ services }: { services: ServiceContent[] }) {
     <div className="relative">
       {services.map((service, i) => (
         <div key={service.id} className="sticky top-20 mb-[28vh]" style={{ zIndex: i + 1 }}>
-          <article className="flex h-[62vh] flex-col justify-center gap-5 rounded-3xl border border-border/60 bg-card p-8 shadow-lg">
+          <article className="flex h-[62vh] flex-col justify-center gap-5 rounded-3xl border border-border bg-card p-8">
             <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-50 text-primary-700">
               <ServiceIcon name={service.icon} className="h-8 w-8" />
             </span>
@@ -106,7 +106,7 @@ function CtaPanel({ mobile }: { mobile?: boolean }) {
     <div
       className={
         "flex flex-col items-center gap-5 rounded-3xl bg-primary-900 px-8 text-center " +
-        (mobile ? "h-[62vh] justify-center shadow-lg" : "py-12 md:py-16")
+        (mobile ? "h-[62vh] justify-center" : "py-12 md:py-16")
       }
     >
       <h2 className="heading-2 text-white">Ready for a beautiful smile?</h2>
