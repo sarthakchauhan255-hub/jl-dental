@@ -25,7 +25,7 @@ const MODULES = [
   { title: "Gallery",          href: "/admin/gallery",   icon: Images,        desc: "Before/after and general photos" },
   { title: "Blog",             href: "/admin/blog",      icon: FileText,      desc: "Articles and news posts" },
   { title: "FAQ",              href: "/admin/faq",       icon: HelpCircle,    desc: "Questions and answers" },
-  { title: "Reviews",          href: "/admin/reviews",   icon: Star,          desc: "Patient testimonials" },
+  //{ title: "Reviews",          href: "/admin/reviews",   icon: Star,          desc: "Patient testimonials" },
   { title: "Appointments",      href: "/admin/appointments", icon: Calendar,    desc: "Booking requests" },
 ];
 
@@ -70,7 +70,7 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
           {[
             { label: "Pending Bookings", value: stats.pendingAppts,  href: "/admin/appointments", highlight: stats.pendingAppts > 0 },
-            { label: "Pending Reviews",  value: stats.pendingReviews, href: "/admin/reviews",     highlight: stats.pendingReviews > 0 },
+            //{ label: "Pending Reviews",  value: stats.pendingReviews, href: "/admin/reviews",     highlight: stats.pendingReviews > 0 },
             { label: "Active Doctors",   value: stats.doctors,        href: "/admin/doctors" },
             { label: "Active Services",  value: stats.services,       href: "/admin/services" },
             { label: "Draft Posts",      value: stats.drafts,         href: "/admin/blog" },
