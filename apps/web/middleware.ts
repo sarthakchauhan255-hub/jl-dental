@@ -30,6 +30,17 @@ function classifyRoute(method: string, pathname: string): RouteType {
   return "public";
 }
 
+/**
+ * Forbid browser/proxy caching of an authenticated admin response so the Back
+ * button cannot show a stale, post-logout snapshot of protected content.
+ */
+function noStore(res: NextResponse): NextResponse {
+  res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.headers.set("Pragma", "no-cache");
+  res.headers.set("Expires", "0");
+  return res;
+}
+
 // ─── Admin page protection ────────────────────────────────────────────────────
 async function handleAdminPage(req: NextRequest): Promise<NextResponse> {
   const { pathname } = req.nextUrl;
@@ -45,7 +56,8 @@ async function handleAdminPage(req: NextRequest): Promise<NextResponse> {
 
   try {
     await jwtVerify(token, SECRET);
-    return NextResponse.next();
+    // Authenticated admin page — never cache (defeats Back-button-after-logout).
+    return noStore(NextResponse.next());
   } catch {
     const res = redirectToLogin(req);
     res.cookies.delete(AUTH_COOKIE);
@@ -90,6 +102,7 @@ function redirectToLogin(req: NextRequest): NextResponse {
   const normalized = req.nextUrl.pathname.replace(/\/+$/, "") || "/";
   // Safety: if we're already on the login path, don't redirect (loop guard)
   if (normalized === LOGIN_PATH) return NextResponse.next();
+
   const url = req.nextUrl.clone();
   url.pathname = LOGIN_PATH;
   url.searchParams.set("from", req.nextUrl.pathname);
