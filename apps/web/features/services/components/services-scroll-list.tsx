@@ -1,27 +1,44 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { ScrollFade } from "@/components/common/motion";
 import { ServiceIcon } from "./service-icon";
 import type { ServiceContent } from "../schemas/service.schema";
 
 /**
- * Services page — vertical stack of wide boxes (icon · title · description)
- * with a strong scroll-linked fade, closing on a CTA that rises into the footer.
- * Content is CMS-driven; this component only controls presentation.
+ * Services presentation. Content is CMS-driven — this only controls layout/motion.
+ *  • Desktop (md+): wide boxes with a strong scroll-linked fade.
+ *  • Mobile (<md):  full cards that stack and overlap — the covered card fades in
+ *    place while the next slides over it; reverses on scroll-up.
  */
 export function ServicesScrollList({ services }: { services: ServiceContent[] }) {
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6 md:gap-8">
+    <>
+      <div className="hidden md:block">
+        <DesktopStack services={services} />
+      </div>
+      <div className="md:hidden">
+        <MobileStack services={services} />
+      </div>
+    </>
+  );
+}
+
+/* ─── Desktop: wide boxes, strong fade ──────────────────────────────────────── */
+function DesktopStack({ services }: { services: ServiceContent[] }) {
+  return (
+    <div className="mx-auto flex max-w-4xl flex-col gap-8">
       {services.map((service) => (
         <ScrollFade key={service.id} floor={0.04} rise={56}>
           <Link
             href={`/services/${service.slug}`}
-            className="group flex items-center gap-5 rounded-2xl border border-border/60 bg-card p-6 shadow-card transition-shadow duration-300 hover:shadow-lg md:gap-7 md:p-8"
+            className="group flex items-center gap-7 rounded-2xl border border-border/60 bg-card p-8 shadow-card transition-shadow duration-300 hover:shadow-lg"
           >
-            <span className="flex h-14 w-14 flex-none items-center justify-center rounded-2xl bg-primary-50 text-primary-700 transition-colors duration-300 group-hover:bg-primary-100 md:h-16 md:w-16">
-              <ServiceIcon name={service.icon} className="h-6 w-6 md:h-7 md:w-7" />
+            <span className="flex h-16 w-16 flex-none items-center justify-center rounded-2xl bg-primary-50 text-primary-700 transition-colors duration-300 group-hover:bg-primary-100">
+              <ServiceIcon name={service.icon} className="h-7 w-7" />
             </span>
             <div className="min-w-0">
               <h2 className="heading-4 mb-1.5 text-primary-900">{service.name}</h2>
@@ -40,21 +57,96 @@ export function ServicesScrollList({ services }: { services: ServiceContent[] })
         </ScrollFade>
       ))}
 
-      {/* Closing CTA — rises in with the same motion, into the footer */}
       <ScrollFade floor={0.04} rise={56} className="pt-2">
-        <div className="flex flex-col items-center gap-5 rounded-3xl bg-primary-900 px-8 py-12 text-center md:py-16">
-          <h2 className="heading-2 text-white">Ready for a beautiful smile?</h2>
-          <p className="body-base max-w-md text-white/70">
-            Book a consultation with our specialists and take the first step today.
-          </p>
-          <Link
-            href="/book"
-            className="btn-base bg-white px-6 py-3 text-primary-900 hover:bg-primary-50"
-          >
-            Book a Consultation
-          </Link>
-        </div>
+        <CtaPanel />
       </ScrollFade>
+    </div>
+  );
+}
+
+/* ─── Mobile: sticky stacking cards ─────────────────────────────────────────── */
+function MobileStack({ services }: { services: ServiceContent[] }) {
+  return (
+    <div className="relative">
+      {services.map((service, i) => (
+        <MobileStackItem key={service.id} index={i}>
+          <article className="flex h-[62vh] flex-col justify-center gap-5 rounded-3xl border border-border/60 bg-card p-8 shadow-lg">
+            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-50 text-primary-700">
+              <ServiceIcon name={service.icon} className="h-8 w-8" />
+            </span>
+            <div>
+              <p className="label-luxury mb-2">{`0${i + 1} — Service`}</p>
+              <h2 className="heading-2 mb-3 text-primary-900">{service.name}</h2>
+              <p className="body-base line-clamp-4 text-muted-foreground">{service.shortDesc}</p>
+            </div>
+            <Link
+              href={`/services/${service.slug}`}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-700"
+            >
+              Learn more
+              <ArrowRight className="h-4 w-4 text-[hsl(var(--accent-cyan))]" aria-hidden="true" />
+            </Link>
+          </article>
+        </MobileStackItem>
+      ))}
+
+      {/* Booking card — the final card in the stack, overlaps the last service */}
+      <MobileStackItem index={services.length} last>
+        <CtaPanel mobile />
+      </MobileStackItem>
+    </div>
+  );
+}
+
+/**
+ * One card in the mobile stack. A tall track (the wrapper) gives the scroll
+ * distance; the card itself is sticky, so it pins in place and fades as the
+ * next card slides up to cover it. The last card (booking) never fades.
+ */
+function MobileStackItem({
+  children,
+  index,
+  last,
+}: {
+  children: React.ReactNode;
+  index: number;
+  last?: boolean;
+}) {
+  const ref           = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1, 0.1]);
+
+  const animate = !reducedMotion && !last;
+
+  return (
+    <div ref={ref} className="h-[100vh]">
+      <motion.div
+        style={animate ? { opacity, zIndex: index + 1 } : { zIndex: index + 1 }}
+        className="sticky top-20"
+      >
+        {children}
+      </motion.div>
+    </div>
+  );
+}
+
+/* ─── Shared closing CTA ─────────────────────────────────────────────────────── */
+function CtaPanel({ mobile }: { mobile?: boolean }) {
+  return (
+    <div
+      className={
+        "flex flex-col items-center gap-5 rounded-3xl bg-primary-900 px-8 text-center " +
+        (mobile ? "h-[62vh] justify-center shadow-lg" : "py-12 md:py-16")
+      }
+    >
+      <h2 className="heading-2 text-white">Ready for a beautiful smile?</h2>
+      <p className="body-base max-w-md text-white/70">
+        Book a consultation with our specialists and take the first step today.
+      </p>
+      <Link href="/book" className="btn-base bg-white px-6 py-3 text-primary-900 hover:bg-primary-50">
+        Book a Consultation
+      </Link>
     </div>
   );
 }

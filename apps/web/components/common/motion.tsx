@@ -104,17 +104,17 @@ interface ScrollFadeProps {
   className?: string;
   /** Rise/drift distance in px (default 48). */
   rise?:      number;
-  /** Opacity floor at the extremes — lower = stronger fade (default 0.06). */
+  /** Opacity floor at the extremes — lower = stronger fade (default 0.04). */
   floor?:     number;
 }
 
 /**
  * ScrollFade — opacity + drift driven by the element's position in the viewport.
- * Crisp in the reading zone (centre); fades + drifts as it enters/leaves.
+ * Narrow crisp window in the centre (~one to two cards), strong fade elsewhere.
  * Unlike Reveal (fires once on enter), this is continuous and reverses on scroll.
  * Respects reduced-motion (renders static, fully visible).
  */
-export function ScrollFade({ children, className, rise = 48, floor = 0.06 }: ScrollFadeProps) {
+export function ScrollFade({ children, className, rise = 48, floor = 0.04 }: ScrollFadeProps) {
   const ref           = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
 
@@ -123,9 +123,9 @@ export function ScrollFade({ children, className, rise = 48, floor = 0.06 }: Scr
     offset: ["start end", "end start"],
   });
 
-  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [floor, 1, 1, floor]);
-  const y       = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [rise, 0, 0, -rise]);
-  const scale   = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.98, 1, 1, 0.98]);
+  const opacity = useTransform(scrollYProgress, [0, 0.42, 0.58, 1], [floor, 1, 1, floor]);
+  const y       = useTransform(scrollYProgress, [0, 0.42, 0.58, 1], [rise, 0, 0, -rise]);
+  const scale   = useTransform(scrollYProgress, [0, 0.42, 0.58, 1], [0.98, 1, 1, 0.98]);
 
   if (reducedMotion) {
     return <div ref={ref} className={className}>{children}</div>;
