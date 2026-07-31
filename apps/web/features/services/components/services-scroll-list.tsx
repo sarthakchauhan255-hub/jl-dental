@@ -2,14 +2,6 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useReducedMotion,
-  type MotionValue,
-} from "framer-motion";
-import { useRef } from "react";
 import { ScrollFade } from "@/components/common/motion";
 import { ServiceIcon } from "./service-icon";
 import type { ServiceContent } from "../schemas/service.schema";
@@ -17,8 +9,9 @@ import type { ServiceContent } from "../schemas/service.schema";
 /**
  * Services presentation. Content is CMS-driven — this only controls layout/motion.
  *  • Desktop (md+): wide boxes; leaving cards fade + shrink into the background.
- *  • Mobile (<md):  cards that pin at the same spot — one shows, holds, then fades
- *    in place while the next rises up and overlaps it; reverses on scroll-up.
+ *  • Mobile (<md):  solid cards that pin at the same spot and cleanly overlap —
+ *    each card shows and holds, then the next rises up and fully covers it.
+ *    No fade (cards are opaque), so nothing shows through. Reverses on scroll-up.
  */
 export function ServicesScrollList({ services }: { services: ServiceContent[] }) {
   return (
@@ -70,17 +63,12 @@ function DesktopStack({ services }: { services: ServiceContent[] }) {
   );
 }
 
-/* ─── Mobile: cards pin at the same spot and overlap ──────────────────────────── */
+/* ─── Mobile: solid cards pin at the same spot and cleanly overlap ─────────────── */
 function MobileStack({ services }: { services: ServiceContent[] }) {
-  const ref = useRef<HTMLDivElement>(null);
-  // Single scroll timeline for the whole stack; each card fades within its slice.
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
-  const count = services.length + 1; // + booking card
-
   return (
-    <div ref={ref} className="relative">
+    <div className="relative">
       {services.map((service, i) => (
-        <MobileStackCard key={service.id} progress={scrollYProgress} index={i} count={count}>
+        <div key={service.id} className="sticky top-20 mb-[28vh]" style={{ zIndex: i + 1 }}>
           <article className="flex h-[62vh] flex-col justify-center gap-5 rounded-3xl border border-border/60 bg-card p-8 shadow-lg">
             <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-50 text-primary-700">
               <ServiceIcon name={service.icon} className="h-8 w-8" />
@@ -98,55 +86,17 @@ function MobileStack({ services }: { services: ServiceContent[] }) {
               <ArrowRight className="h-4 w-4 text-[hsl(var(--accent-cyan))]" aria-hidden="true" />
             </Link>
           </article>
-        </MobileStackCard>
+        </div>
       ))}
 
-      {/* Booking card — final card in the stack, overlaps the last service, stays put */}
-      <MobileStackCard progress={scrollYProgress} index={services.length} count={count} last>
+      {/* Booking card — final card in the stack, highest layer, fully covers the last service */}
+      <div className="sticky top-20 mb-[28vh]" style={{ zIndex: services.length + 1 }}>
         <CtaPanel mobile />
-      </MobileStackCard>
+      </div>
+
+      {/* Trailing room so the booking card rises all the way up and holds before the footer */}
+      <div aria-hidden className="h-[50vh]" />
     </div>
-  );
-}
-
-/**
- * One pinned card. All cards share the stack's containing block and stick to the
- * same top, so each rises up and overlaps the previous card's exact position.
- * Opacity is driven by the shared scroll timeline: the card holds, then fades as
- * the next one covers it. The booking card (last) never fades.
- */
-function MobileStackCard({
-  children,
-  progress,
-  index,
-  count,
-  last,
-}: {
-  children: React.ReactNode;
-  progress: MotionValue<number>;
-  index: number;
-  count: number;
-  last?: boolean;
-}) {
-  const reducedMotion = useReducedMotion();
-  const step  = 1 / count;
-  const start = index * step;
-  // Hold fully visible for the first part of the slice, then fade as it's covered.
-  const opacity = useTransform(
-    progress,
-    [start, start + step * 0.6, start + step],
-    [1, 1, 0.06],
-  );
-
-  const animate = !reducedMotion && !last;
-
-  return (
-    <motion.div
-      className="sticky top-20 mb-[28vh] last:mb-0"
-      style={animate ? { opacity, zIndex: index + 1 } : { zIndex: index + 1 }}
-    >
-      {children}
-    </motion.div>
   );
 }
 
