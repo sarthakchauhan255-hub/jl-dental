@@ -52,11 +52,7 @@ export function DoctorSpotlights({ doctors }: { doctors: DoctorContent[] }) {
                 {doctor.qualifications.join("  ·  ")}
               </p>
             )}
-            {doctor.bio && (
-              <p className="body-base mb-7 max-w-prose whitespace-pre-line text-muted-foreground">
-                {doctor.bio}
-              </p>
-            )}
+            {doctor.bio && <DoctorBio bio={doctor.bio} />}
             <Link
               href="/book"
               className="btn-base inline-flex items-center gap-2 bg-primary-900 px-6 py-3 text-white hover:bg-primary-800"
@@ -81,6 +77,60 @@ export function DoctorSpotlights({ doctors }: { doctors: DoctorContent[] }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/**
+ * Renders a doctor's free-text bio. Paragraphs (separated by blank lines) become
+ * prose. An "Areas of Expertise" line, if present, splits off the lines beneath it
+ * into a styled two-column list. Falls back to plain paragraphs when absent.
+ */
+function DoctorBio({ bio }: { bio: string }) {
+  const lines = bio.split("\n").map((l) => l.trim());
+  const headingIdx = lines.findIndex((l) => /^areas of expertise:?$/i.test(l));
+
+  const toParagraphs = (text: string) =>
+    text
+      .split(/\n\s*\n/)
+      .map((p) => p.trim())
+      .filter(Boolean);
+
+  const paragraphs =
+    headingIdx === -1
+      ? toParagraphs(bio)
+      : toParagraphs(lines.slice(0, headingIdx).join("\n"));
+
+  const expertise = headingIdx === -1 ? [] : lines.slice(headingIdx + 1).filter(Boolean);
+
+  return (
+    <div className="mb-7 max-w-prose">
+      <div className="space-y-4">
+        {paragraphs.map((p, idx) => (
+          <p key={idx} className="body-base whitespace-pre-line text-muted-foreground">
+            {p}
+          </p>
+        ))}
+      </div>
+
+      {expertise.length > 0 && (
+        <div className="mt-6">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-primary-700">
+            Areas of Expertise
+          </p>
+          <ul className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
+            {expertise.map((item, idx) => (
+              <li key={idx} className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span
+                  className="h-1.5 w-1.5 flex-none rounded-full bg-[hsl(var(--accent-cyan))]"
+                  aria-hidden="true"
+                />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
