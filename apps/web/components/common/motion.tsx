@@ -6,7 +6,7 @@
  */
 import { motion, useInView, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { useRef }                               from "react";
-import { variants, stagger }                    from "@/lib/motion";
+import { variants, stagger, transition }        from "@/lib/motion";
 
 // ─── Scroll-reveal wrapper ───────────────────────────────────────────────────
 interface RevealProps {
@@ -110,7 +110,6 @@ interface ScrollFadeProps {
 
 /**
  * ScrollFade — opacity + drift driven by the element's position in the viewport.
- * Narrow crisp window in the centre; strong fade elsewhere.
  *  • Entering (from below): fade in + rise, at full size.
  *  • Leaving  (at the top):  fade out + shrink, receding into the background.
  * Continuous and reverses on scroll. Respects reduced-motion (static, visible).
@@ -119,15 +118,10 @@ export function ScrollFade({ children, className, rise = 48, floor = 0.04 }: Scr
   const ref           = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
 
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  });
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
 
   const opacity = useTransform(scrollYProgress, [0, 0.42, 0.58, 1], [floor, 1, 1, floor]);
-  // Enter rises from below; leave drifts up only slightly (shrink carries it back).
   const y       = useTransform(scrollYProgress, [0, 0.42, 0.58, 1], [rise, 0, 0, -16]);
-  // No shrink on entry (stays 1); shrink only as it leaves the top.
   const scale   = useTransform(scrollYProgress, [0, 0.42, 0.58, 1], [1, 1, 1, 0.8]);
 
   if (reducedMotion) {
@@ -136,6 +130,46 @@ export function ScrollFade({ children, className, rise = 48, floor = 0.04 }: Scr
 
   return (
     <motion.div ref={ref} style={{ opacity, y, scale }} className={className}>
+      {children}
+    </motion.div>
+  );
+}
+
+// ─── Directional slide-in (scroll reveal) ────────────────────────────────────
+interface SlideInProps {
+  children:   React.ReactNode;
+  className?: string;
+  /** Direction the element slides in FROM. */
+  from:       "left" | "right";
+  /** Travel distance in px. Large = from the outer edge; small = from the centre. */
+  distance?:  number;
+  /** Delay in seconds. */
+  delay?:     number;
+}
+
+/**
+ * SlideIn — slides + fades in horizontally when it enters the viewport (once).
+ * Pair two (from "left" + from "right") to converge from the edges, or use small
+ * distances to emerge from the centre. Respects reduced-motion (instant show).
+ */
+export function SlideIn({ children, className, from, distance = 80, delay = 0 }: SlideInProps) {
+  const ref           = useRef<HTMLDivElement>(null);
+  const inView        = useInView(ref, { once: true, margin: "-12% 0px" });
+  const reducedMotion = useReducedMotion();
+  const x = from === "left" ? -distance : distance;
+
+  if (reducedMotion) {
+    return <div ref={ref} className={className}>{children}</div>;
+  }
+
+  return (
+    <motion.div
+      ref={ref}
+      className={className}
+      initial={{ opacity: 0, x }}
+      animate={inView ? { opacity: 1, x: 0 } : { opacity: 0, x }}
+      transition={{ ...transition.reveal, delay }}
+    >
       {children}
     </motion.div>
   );
