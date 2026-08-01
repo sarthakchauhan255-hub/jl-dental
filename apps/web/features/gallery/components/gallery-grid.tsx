@@ -104,7 +104,7 @@ export function GalleryGrid({ items }: { items: GalleryItemContent[] }) {
 
       {/* Mosaic */}
       {!measured ? (
-        <div className="grid auto-rows-[8rem] grid-cols-2 gap-3 [grid-auto-flow:dense] sm:auto-rows-[10rem] md:auto-rows-[12rem] md:grid-cols-3 md:gap-4 lg:auto-rows-[13rem] lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2.5 [grid-auto-flow:dense] auto-rows-[8.5rem] sm:auto-rows-[11rem] sm:gap-3.5 md:grid-cols-3 md:auto-rows-[12rem] md:gap-4 lg:grid-cols-4 lg:auto-rows-[13rem]">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
@@ -113,7 +113,7 @@ export function GalleryGrid({ items }: { items: GalleryItemContent[] }) {
           ))}
         </div>
       ) : (
-        <div className="grid auto-rows-[8rem] grid-cols-2 gap-3 [grid-auto-flow:dense] sm:auto-rows-[10rem] md:auto-rows-[12rem] md:grid-cols-3 md:gap-4 lg:auto-rows-[13rem] lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2.5 [grid-auto-flow:dense] auto-rows-[8.5rem] sm:auto-rows-[11rem] sm:gap-3.5 md:grid-cols-3 md:auto-rows-[12rem] md:gap-4 lg:grid-cols-4 lg:auto-rows-[13rem]">
           {filtered.map((item) => {
             if (item.type === "before_after" && item.before?.publicId && item.after?.publicId) {
               return (

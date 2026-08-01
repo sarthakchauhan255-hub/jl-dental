@@ -1,103 +1,129 @@
 import type { Metadata } from "next";
-import { FileText } from "lucide-react";
-import { Section } from "@/components/common/section";
-import { StaggerReveal, Reveal }  from "@/components/common/motion";
-import { EmptyState }       from "@/components/states";
-import { BlogCard }         from "@/features/blog/components/blog-card";
-import { BlogFeatured }     from "@/features/blog/components/blog-featured";
-import { getCmsProvider }     from "@/features/shared/cms";
-import { resolveMetadata }  from "@/lib/seo";
-import { REVALIDATE }       from "@/lib/cache";
-import { BRAND } from "@/config/branding";
+import { notFound }      from "next/navigation";
+import Link               from "next/link";
+import { ArrowLeft }      from "lucide-react";
+import { OptimizedImage } from "@/components/common/optimized-image";
+import { Reveal }         from "@/components/common/motion";
+import { ArticleBody }    from "@/features/blog/components/article-body";
+import { blogCoverUrl }   from "@/lib/media/cloudinary-url";
+import { formatDateIST }  from "@/lib/timezone";
+import { getCmsProvider } from "@/features/shared/cms";
+import { resolveMetadata, buildJsonLd } from "@/lib/seo";
+import { REVALIDATE }     from "@/lib/cache";
 
-export const revalidate = REVALIDATE.blog_list;
-const PAGE_SIZE = 9;
+export const revalidate = REVALIDATE.blog_post;
 
-export async function generateMetadata(): Promise<Metadata> {
+interface PageProps { params: Promise<{ slug: string }> }
+
+function readTime(content: string): number {
+  return Math.max(1, Math.ceil(content.trim().split(/\s+/).length / 200));
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const cms = getCmsProvider();
+  const post = await cms.getPostBySlug(slug);
+  if (!post) return resolveMetadata({ path: `/blog/${slug}`, pageSeo: { noIndex: true } });
+
   return resolveMetadata({
-    path: "/blog",
-    entityTitle: "Dental Health Blog",
-    entityDesc:  `Expert dental advice and clinic updates from ${BRAND.NAME}, ${BRAND.CITY}.`,
+    path: `/blog/${slug}`,
+    titleTemplate: "blog",
+    entityTitle:   post.title,
+    entityDesc:    post.excerpt || post.title,
+    entityImage:   post.coverImage,
   });
 }
 
-export default async function BlogPage({
-  searchParams,
-}: { searchParams: Promise<{ page?: string }> }) {
-  const { page: pageParam } = await searchParams;
-  const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
-
+export default async function BlogPostPage({ params }: PageProps) {
+  const { slug } = await params;
   const cms = getCmsProvider();
-  const allPosts = await cms.getPublishedPosts();
-  const totalPages = Math.max(1, Math.ceil(allPosts.length / PAGE_SIZE));
-  const posts = allPosts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const post = await cms.getPostBySlug(slug);
 
-  // Feature the newest post on page 1 only.
-  const featured = page === 1 ? posts[0] : undefined;
-  const gridPosts = featured ? posts.slice(1) : posts;
+  if (!post) notFound();
+
+  const schema = buildJsonLd({
+    "@type":        "Article",
+    headline:        post.title,
+    description:     post.excerpt,
+    datePublished:   post.publishedAt,
+    author:          { "@type": "Organization", name: post.author },
+  });
 
   return (
-    <>
-      {/* Petrol hero */}
-      <section className="bg-primary-900 text-white">
-        <div className="container-base py-20 md:py-28 lg:py-32">
-          <p className="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-[hsl(var(--accent-cyan))]">
-            Insights
-          </p>
-          <h1 className="heading-1 max-w-3xl text-white">Dental Health Blog</h1>
-          <p className="body-lg mt-5 max-w-xl text-white/70">
-            Expert advice and updates from our clinic.
-          </p>
+    <article className="pb-20">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: schema }} />
+
+      {/* Header */}
+      <div className="container-narrow pt-12 md:pt-20">
+        <Link
+          href="/blog"
+          className="mb-8 inline-flex items-center gap-1.5 text-sm font-medium text-primary-700 transition-colors hover:text-primary-900"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Back to blog
+        </Link>
+
+        <Reveal variant="fadeUp">
+          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--accent-cyan))]">
+            {post.category}
+          </span>
+          <h1 className="heading-1 balance mb-4 mt-2 text-primary-900">{post.title}</h1>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+            <span>{post.author}</span>
+            {post.publishedAt && (
+              <>
+                <span aria-hidden="true">·</span>
+                <span>{formatDateIST(post.publishedAt)}</span>
+              </>
+            )}
+            <span aria-hidden="true">·</span>
+            <span>{readTime(post.content)} min read</span>
+          </div>
+        </Reveal>
+      </div>
+
+      {/* Cover */}
+      {post.coverImage?.publicId && (
+        <div className="container-base mt-10">
+          <div className="relative aspect-video w-full overflow-hidden rounded-2xl md:rounded-3xl">
+            <OptimizedImage
+              src={blogCoverUrl(post.coverImage.publicId, 1200)}
+              alt={post.title}
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 1000px"
+              className="object-cover"
+            />
+          </div>
         </div>
-      </section>
+      )}
 
-      <Section bg="muted" size="lg">
-        {posts.length === 0 ? (
-          <EmptyState
-            icon={FileText}
-            heading="New articles coming soon"
-            description="We're working on helpful content for our patients. Check back soon."
-          />
-        ) : (
-          <>
-            {featured && (
-              <Reveal variant="fadeUp" className="mb-12">
-                <BlogFeatured post={featured} />
-              </Reveal>
-            )}
+      {/* Body */}
+      <div className="container-narrow mt-10 md:mt-14">
+        <ArticleBody content={post.content} />
+      </div>
 
-            {gridPosts.length > 0 && (
-              <StaggerReveal className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {gridPosts.map((post) => (
-                  <Reveal key={post.id} variant="fadeUp">
-                    <BlogCard post={post} />
-                  </Reveal>
-                ))}
-              </StaggerReveal>
-            )}
-
-            {totalPages > 1 && (
-              <nav aria-label="Blog pagination" className="mt-14 flex justify-center gap-2">
-                {Array.from({ length: totalPages }).map((_, i) => {
-                  const p = i + 1;
-                  return (
-                    <a
-                      key={p}
-                      href={p === 1 ? "/blog" : `/blog?page=${p}`}
-                      aria-current={p === page ? "page" : undefined}
-                      className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium transition-colors ${
-                        p === page ? "bg-primary-900 text-white" : "text-charcoal-600 hover:bg-charcoal-100"
-                      }`}
-                    >
-                      {p}
-                    </a>
-                  );
-                })}
-              </nav>
-            )}
-          </>
-        )}
-      </Section>
-    </>
+      {/* CTA */}
+      <div className="container-narrow mt-16">
+        <div className="rounded-3xl bg-primary-900 px-6 py-12 text-center md:py-14">
+          <h2 className="heading-3 mb-3 text-white">Have questions about your dental health?</h2>
+          <p className="body-base mx-auto mb-6 max-w-md text-white/70">
+            Book a consultation with our specialists — we're always happy to help.
+          </p>
+          <Link
+            href="/book"
+            className="btn-base inline-flex bg-white px-7 py-3 text-primary-900 hover:bg-primary-50"
+          >
+            Book a Consultation
+          </Link>
+        </div>
+      </div>
+    </article>
   );
+}
+
+export async function generateStaticParams() {
+  const { getPublishedPosts } = await import("@/features/blog/server/get-blog-posts");
+  const posts = await getPublishedPosts();
+  return posts.map((p) => ({ slug: p.slug }));
 }

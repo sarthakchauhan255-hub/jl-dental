@@ -34,11 +34,11 @@ export function BlogFeatured({ post }: { post: BlogPostContent }) {
           Featured
         </span>
       </div>
-      <div className="md:pr-6">
+      <div className="min-w-0 md:pr-6">
         <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[hsl(var(--accent-cyan))]">
           {post.category}
         </span>
-        <h2 className="heading-2 mb-3 mt-2 text-primary-900 transition-colors group-hover:text-primary-700">
+        <h2 className="heading-2 mb-3 mt-2 text-balance break-words text-primary-900 transition-colors group-hover:text-primary-700">
           {post.title}
         </h2>
         {post.excerpt && (
