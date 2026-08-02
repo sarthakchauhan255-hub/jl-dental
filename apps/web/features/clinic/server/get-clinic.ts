@@ -1,55 +1,47 @@
 import { BRAND } from "@/config/branding";
 /**
  * Server-side clinic config fetcher.
- * Single source for all server components and API routes that need clinic data.
- * Results are cached appropriately per rendering strategy.
+ *
+ * Cached via Next's unstable_cache and keyed to the clinic + homepage cache tags,
+ * so CMS updates (which call revalidateTag) propagate to the public site
+ * immediately — matching how services, doctors, blog, etc. already behave.
  */
-import { connectDB }      from "@/lib/db";
-import { Clinic }         from "@/models/Clinic";
-import type { IClinic }   from "@/models/Clinic";
+import { unstable_cache }        from "next/cache";
+import { connectDB }             from "@/lib/db";
+import { Clinic }                from "@/models/Clinic";
+import type { IClinic }          from "@/models/Clinic";
+import { CACHE_TAGS, REVALIDATE } from "@/lib/cache";
 
-let clinicCache: IClinic | null = null;
-let clinicCacheTime = 0;
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes in-memory cache
+const getClinicCached = unstable_cache(
+  async (): Promise<IClinic | null> => {
+    await connectDB();
+    return (await Clinic.findOne({ isActive: true, slug: BRAND.SLUG }).lean()) as IClinic | null;
+  },
+  ["clinic-config"],
+  { tags: [CACHE_TAGS.clinic, CACHE_TAGS.homepage], revalidate: REVALIDATE.homepage },
+);
 
 /**
- * Get the active clinic config.
- * In-memory cache with 5 min TTL — avoids DB hit on every ISR render.
- * Cache is invalidated when clinic config is updated via the CMS API.
+ * Get the active clinic config. Tag-invalidated on CMS updates, so homepage /
+ * clinic edits show on the public site as soon as the next request renders.
  */
 export async function getClinic(): Promise<IClinic | null> {
-  const now = Date.now();
-
-  if (clinicCache && now - clinicCacheTime < CACHE_TTL_MS) {
-    return clinicCache;
-  }
-
   try {
-    await connectDB();
-    const clinic = await Clinic.findOne({ isActive: true, slug: BRAND.SLUG }).lean() as IClinic | null;
-    if (clinic) {
-      clinicCache     = clinic;
-      clinicCacheTime = now;
-    }
-    return clinic;
+    return await getClinicCached();
   } catch {
-    // Return cached version if DB is temporarily unavailable
-    return clinicCache;
+    return null;
   }
 }
 
 /**
- * Invalidate clinic cache — call after CMS updates.
+ * Retained for API compatibility. Freshness is now handled by tag-based
+ * revalidation (revalidateTag on CACHE_TAGS.clinic / CACHE_TAGS.homepage),
+ * so this is intentionally a no-op.
  */
 export function invalidateClinicCache(): void {
-  clinicCache     = null;
-  clinicCacheTime = 0;
+  /* no-op — superseded by revalidateTag */
 }
 
-/**
- * Get safe defaults for when clinic config is unavailable.
- * Frontend must never crash due to missing CMS data.
- */
 export function getClinicDefaults() {
   return {
     name:  BRAND.NAME,
