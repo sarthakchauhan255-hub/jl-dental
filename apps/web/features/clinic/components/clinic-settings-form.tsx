@@ -113,30 +113,41 @@ export function ClinicSettingsForm({ initialData }: { initialData: PartialClinic
       {/* Contact */}
       <SectionCard title="Contact Information">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {(["phone","whatsapp","email","address"] as const).map(field => (
-            <FormField
-              key={field}
-              id={`contact-${field}`}
-              label={field.charAt(0).toUpperCase() + field.slice(1)}
-              error={errors[`contact.${field}`]}
-            >
-              {field === "address" ? (
-                <Textarea
-                  id={`contact-${field}`}
-                  rows={2}
-                  value={((form as Record<string,unknown>).contact as Record<string,string>)?.[field] ?? ""}
-                  onChange={e => update({ contact: { ...((form as Record<string,unknown>).contact as object), [field]: e.target.value } } as PartialClinic)}
-                />
-              ) : (
-                <Input
-                  id={`contact-${field}`}
-                  type={field === "email" ? "email" : "text"}
-                  value={((form as Record<string,unknown>).contact as Record<string,string>)?.[field] ?? ""}
-                  onChange={e => update({ contact: { ...((form as Record<string,unknown>).contact as object), [field]: e.target.value } } as PartialClinic)}
-                />
-              )}
-            </FormField>
-          ))}
+          {(["phone","whatsapp","email","address","mapEmbedUrl","mapDirectionsUrl"] as const).map(field => {
+            const CONTACT_LABELS: Record<string, string> = {
+              phone: "Phone", whatsapp: "WhatsApp", email: "Email", address: "Address",
+              mapEmbedUrl: "Map Embed URL", mapDirectionsUrl: "Map Directions URL",
+            };
+            const placeholder =
+              field === "mapEmbedUrl"      ? "https://www.google.com/maps/embed?pb=… (paste only the src link)"
+            : field === "mapDirectionsUrl" ? "https://maps.app.goo.gl/… (optional)"
+            : undefined;
+            return (
+              <FormField
+                key={field}
+                id={`contact-${field}`}
+                label={CONTACT_LABELS[field]}
+                error={errors[`contact.${field}`]}
+              >
+                {field === "address" ? (
+                  <Textarea
+                    id={`contact-${field}`}
+                    rows={2}
+                    value={((form as Record<string,unknown>).contact as Record<string,string>)?.[field] ?? ""}
+                    onChange={e => update({ contact: { ...((form as Record<string,unknown>).contact as object), [field]: e.target.value } } as PartialClinic)}
+                  />
+                ) : (
+                  <Input
+                    id={`contact-${field}`}
+                    type={field === "email" ? "email" : "text"}
+                    placeholder={placeholder}
+                    value={((form as Record<string,unknown>).contact as Record<string,string>)?.[field] ?? ""}
+                    onChange={e => update({ contact: { ...((form as Record<string,unknown>).contact as object), [field]: e.target.value } } as PartialClinic)}
+                  />
+                )}
+              </FormField>
+            );
+          })}
         </div>
       </SectionCard>
 
