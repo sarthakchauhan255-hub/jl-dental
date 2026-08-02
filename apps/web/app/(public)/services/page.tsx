@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Stethoscope } from "lucide-react";
-import { Section, SectionHeader } from "@/components/common/section";
+import { Section } from "@/components/common/section";
 import { EmptyState }             from "@/components/states";
 import { ServicesScrollList }     from "@/features/services/components/services-scroll-list";
 import { getCmsProvider }         from "@/features/shared/cms";
@@ -22,24 +22,32 @@ export default async function ServicesPage() {
   const services = await cms.getServices();
 
   return (
-    <Section bg="muted" size="lg">
-      <SectionHeader
-        label="What We Offer"
-        heading="Our Services"
-        subtext="Comprehensive dental care, delivered with precision and compassion."
-        align="left"
-      />
+    <>
+      {/* Petrol hero */}
+      <section className="bg-primary-900 text-white">
+        <div className="container-base py-20 md:py-28 lg:py-32">
+          <p className="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-[hsl(var(--accent-cyan))]">
+            What We Offer
+          </p>
+          <h1 className="heading-1 max-w-3xl text-white">Our Services</h1>
+          <p className="body-lg mt-5 max-w-xl text-white/70">
+            Comprehensive dental care, delivered with precision and compassion.
+          </p>
+        </div>
+      </section>
 
-      {services.length === 0 ? (
-        <EmptyState
-          icon={Stethoscope}
-          heading="Services coming soon"
-          description="We're putting together our full list of treatments. Please check back shortly, or contact us directly."
-          action={{ label: "Contact Us", href: "/contact" }}
-        />
-      ) : (
-        <ServicesScrollList services={services} />
-      )}
-    </Section>
+      <Section bg="muted" size="lg">
+        {services.length === 0 ? (
+          <EmptyState
+            icon={Stethoscope}
+            heading="Services coming soon"
+            description="We're putting together our full list of treatments. Please check back shortly, or contact us directly."
+            action={{ label: "Contact Us", href: "/contact" }}
+          />
+        ) : (
+          <ServicesScrollList services={services} />
+        )}
+      </Section>
+    </>
   );
 }

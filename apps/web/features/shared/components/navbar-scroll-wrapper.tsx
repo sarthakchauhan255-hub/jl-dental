@@ -1,41 +1,17 @@
-"use client";
-import { useState, useEffect } from "react";
-import { usePathname }         from "next/navigation";
-import { cn }                  from "@/lib/utils";
-
 interface NavbarScrollWrapperProps {
   children: React.ReactNode;
+  /** Retained for API compatibility — the navbar now uses a constant background. */
   transparentOnHome?: boolean;
 }
 
 /**
- * Wraps the navbar to add scroll-aware background transition.
- * On homepage: transparent at top, solid white after scroll.
- * On all other pages: always solid (set immediately on mount).
+ * Fixed site header with a constant bone background on every page.
+ * Previously it switched transparent→white on scroll (with a colour transition),
+ * which caused a flash / logo pop on the homepage. Now it never changes.
  */
-export function NavbarScrollWrapper({ children, transparentOnHome = true }: NavbarScrollWrapperProps) {
-  const pathname = usePathname();
-  const isHome   = pathname === "/";
-  const [scrolled, setScrolled] = useState(!isHome || !transparentOnHome);
-
-  useEffect(() => {
-    if (!isHome || !transparentOnHome) { setScrolled(true); return; }
-    setScrolled(window.scrollY > 60);
-    const onScroll = () => setScrolled(window.scrollY > 60);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [isHome, transparentOnHome]);
-
-  const transparent = isHome && transparentOnHome && !scrolled;
-
+export function NavbarScrollWrapper({ children }: NavbarScrollWrapperProps) {
   return (
-    <header
-      className={cn(
-        "fixed inset-x-0 top-0 z-sticky h-16 lg:h-20 transition-colors duration-250",
-        transparent ? "bg-transparent" : "bg-white shadow-sm border-b border-charcoal-100/60"
-      )}
-      data-transparent={transparent}
-    >
+    <header className="fixed inset-x-0 top-0 z-sticky h-16 border-b border-border/60 bg-background lg:h-20">
       {children}
     </header>
   );
