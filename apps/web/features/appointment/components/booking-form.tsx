@@ -32,6 +32,7 @@ export function BookingForm({ services }: BookingFormProps) {
   const [preferredTime, setPreferredTime] = useState<string>("");
   const [urgencyLevel, setUrgencyLevel]   = useState("normal");
   const [notes, setNotes]                 = useState("");
+  const [consent, setConsent]             = useState(false);
   const [website, setWebsite]             = useState(""); // honeypot — humans never see it
   const [serverError, setServerError]     = useState<string | null>(null);
   const [reference, setReference]         = useState<string | null>(null);
@@ -47,6 +48,7 @@ export function BookingForm({ services }: BookingFormProps) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) nextErrors.email = "Please enter a valid email";
     if (!preferredDate)                 nextErrors.preferredDate = "Please select a date";
     if (!preferredTime)                 nextErrors.preferredTime = "Please select a time";
+    if (!consent)                       nextErrors.consent = "Please agree to the Privacy Policy to continue.";
 
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
@@ -198,6 +200,27 @@ export function BookingForm({ services }: BookingFormProps) {
 
 
       )}
+
+      <div className="space-y-1.5">
+        <label htmlFor="consent" className="flex cursor-pointer items-start gap-3 text-sm text-muted-foreground">
+          <input
+            id="consent"
+            type="checkbox"
+            checked={consent}
+            onChange={(e) => setConsent(e.target.checked)}
+            aria-describedby={errors.consent ? "consent-error" : undefined}
+            className="mt-0.5 h-4 w-4 flex-none rounded border-border accent-primary-700"
+          />
+          <span>
+            I agree to the{" "}
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary-600 underline hover:text-primary-700">
+              Privacy Policy
+            </a>{" "}
+            and consent to my details being used to handle my appointment request.
+          </span>
+        </label>
+        {errors.consent && <p id="consent-error" role="alert" className="text-xs text-destructive">{errors.consent}</p>}
+      </div>
 
       <Button type="submit" size="lg" disabled={loading} className="w-full">
         {loading ? "Submitting…" : "Request Appointment"}

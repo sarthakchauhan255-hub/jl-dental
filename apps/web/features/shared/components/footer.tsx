@@ -51,6 +51,7 @@ export async function Footer() {
                 { label: "Gallery", href: "/gallery" },
                 { label: "Blog", href: "/blog" },
                 { label: "FAQ", href: "/faq" },
+                { label: "Privacy Policy", href: "/privacy" },
               ].map((l) => (
                 <li key={l.href}>
                   <Link href={l.href} className="hover:text-white transition-colors">{l.label}</Link>
